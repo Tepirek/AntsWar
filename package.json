@@ -1,0 +1,26 @@
+{
+  "name": "antswar",
+  "version": "1.0.0",
+  "description": "2d game",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tepirek/AntsWar.git"
+  },
+  "author": "Arkadiusz Tepper, Tomasz Tomaszewski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tepirek/AntsWar/issues"
+  },
+  "homepage": "https://github.com/Tepirek/AntsWar#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
