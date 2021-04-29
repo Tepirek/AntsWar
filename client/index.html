@@ -1,14 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="src/css/style.css" />
+    <link rel="stylesheet" href="src/css/player.css" />
+    <link rel="stylesheet" href="src/css/Lobby.css" />
     <link rel="shortcut icon" href="src/img/favicon.ico" type="image/x-icon" />
     <title>Ant's War</title>
-</head>
-<body>
+  </head>
+  <body>
+    <div class="container">
+      <img class="backgroundImage" src="src/img/antBackground.gif"/>
+      <div class="game">
+        <div class="stats"></div>
+        <div class="gameBoard"></div>
+        <div class="gameOptions">
+          <div class="buildings"></div>
+          <div class="objectOptions"></div>
+          <div class="units"></div>
+          <div class="chatButton"></div>
+        </div>
+      </div>
+      <div class="footer">
+        Ant's War &copy; 2021 - Arkadiusz Tepper & Tomasz Tomaszewski
+      </div>
+      <div class="chat"></div>
+      <div class="lobby"></div>
+    </div>
     
-</body>
+    <script src="game/Chat.js"></script>
+    <script src="game/Game.js"></script>
+    <script src="game/Lobby.js"></script>
+
+    <script src="socket.io/socket.io.js"></script>
+    <script src="src/js/client.js"></script>
+  </body>
 </html>

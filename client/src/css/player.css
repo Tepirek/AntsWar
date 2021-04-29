@@ -1,0 +1,42 @@
+.buildings {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.buildingBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.buildingPrototype {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    font-size: 1rem;
+    width: 64px;
+    height: 64px;
+    border: 1px solid #1be393;
+    background-color: #cccccc;
+    color: #000000;
+    font-weight: bold;
+}
+
+.buildingPrototype:hover {
+    background-color: #1be393;
+    transition: 0.5s;
+    cursor: pointer;
+}
+
+.objectOptions table {
+    width: 100%;
+}
+
+#antBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}

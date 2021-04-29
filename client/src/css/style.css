@@ -1,0 +1,174 @@
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #ffffff;
+    color: #ffffff;
+    font-size: 1.2rem;
+    overflow: hidden;
+}
+
+.backgroundImage {
+    position: absolute;
+    top: -45%;
+    transform: translateY(45%);
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.footer {
+    color:#333333;
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 10px;
+    letter-spacing: 1px;
+    text-decoration: underline;
+}
+
+.game {
+    flex: 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.gameBoard {
+    position: relative;
+    display: flex;
+    margin: 10px;
+}
+
+.gameOptions {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.buildings, .objectOptions, .units, .chatButton {
+    text-align: center;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #1be393;
+    border-radius: 20px;
+}
+
+.units:hover, .chatButton:hover {
+    background-color: #1be393;
+    transition: 1s;
+    cursor: pointer;
+}
+
+.buildings {
+    flex: 1 auto;
+}
+
+.objectOptions {
+    flex: 1 auto;
+}
+
+.units {
+    flex: 6 auto;
+}
+
+.chatButton {
+    flex: 1 auto;
+}
+
+.stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.stats ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content:flex-end;
+    border-bottom: 1px solid #ffee00;
+}
+
+.stats ul > li {
+    margin: 10px;
+}
+
+.chat {
+    position: absolute;
+    background-color: #333333;
+    margin: 20px;
+    color: #ffffff;
+    width: 40vw;
+}
+
+.chat input, .lobby input {
+    outline: none;
+    font-size: 1.0rem;
+    padding: 0 5px;
+}
+
+button {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 3px 15px;
+    color: white;
+    line-height: 20px;
+    background-color: #1be393;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.12) 0 1px 6px, rgba(0, 0, 0, 0.12) 0 1px 4px;
+    transition: all 150ms ease-in;
+    outline: none;
+}
+
+button:hover {
+    background-color: #083a8a;
+}
+
+.chat ul {
+    list-style: none;
+    overflow-y: scroll;
+}
+
+.chat ul > li {
+    padding: 5px;
+    margin: 0px 5px;
+    border-bottom: 1px solid #bababa;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.chat-wrapper {
+    padding: 10px;
+}
+
+.chat-wrapper form {
+    display: flex;
+}
+  
+.chat-wrapper form input {
+    width: 300px;
+    font-size: 1.0rem;
+    margin: 0 10px 0 0;
+    padding: 0 5px;
+    flex-grow: 1;
+}
+  
+.chat-wrapper form button {
+    width: 100px;
+}
+
+#events {
+    height: 30vh;
+}
