@@ -1,4 +1,13 @@
 (() => {
+    
+    if(!localStorage.getItem('config')) localStorage.setItem('config', JSON.stringify({
+        chat: false,
+    }));
+    if(!localStorage.getItem('action')) localStorage.setItem('action', JSON.stringify({
+        type: '',
+        target: ''
+    }));
+
     const sock = io();
     sock.on('connect', () => {
 

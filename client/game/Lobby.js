@@ -6,9 +6,6 @@ class Lobby {
         this.socket.on('game__prepare', (response) => {
             this.lobbyPrepare(response);
         });
-        this.socket.on('game__init', (response) => {
-            this.clearLobby(response);
-        });
     };
 };
 
@@ -72,7 +69,3 @@ Lobby.prototype.lobbyPrepare = function(response) {
         timer.innerHTML = `Gra rozpocznie się za ${parseInt(--time)}s`;
     }, 1000);
 }
-
-Lobby.prototype.clearLobby = function(response) {
-    this.lobby.parentElement.removeChild(this.lobby);
-};

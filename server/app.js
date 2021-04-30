@@ -35,7 +35,6 @@ io.on('connection', (sock) => {
     sock.on('chat_init', () => chat.init(game, sock));
     sock.on('chat_message', (request) => chat.sendMessage(game, sock, request));
 
-
     // GAME EVENTS
     sock.on('game_addNewBuilding', (request) => game.__addNewBuilding(request));
     sock.on('game_addNewWorker', (request) => game.__addNewWorker(request));

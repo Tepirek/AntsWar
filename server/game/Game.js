@@ -30,10 +30,19 @@ Game.prototype.init = function() {
         console.log(player);
         color++;
     })
-    Object.keys(this.players).forEach(key => {
-        this.io.emit('game__init', {
-            config: config.params
+    color = 0;
+    Object.values(this.players).forEach(player => {
+        this.io.to(player.id).emit('game__init', {
+            config: config.params,
+            map: this.map
         });
+        this.__addNewBuilding({
+            id: player.id,
+            target: 'base',
+            color: color,
+            position: player.initCoords
+        });
+        color++;
     })
 }
 
@@ -82,10 +91,12 @@ Game.prototype.displayPlayers = function() {
  * Adds a new building to the map.
  */
 Game.prototype.__addNewBuilding = function(request) {
-    console.log(request);
-    Object.keys(this.players).forEach(key => {
-        this.io.to(key).emit('__addNewBuilding', {
-
+    Object.values(this.players).forEach(player => {
+        this.io.to(player.id).emit('game__addNewBuilding', {
+            owner: request.id,
+            target: request.target,
+            color: request.color,
+            position: request.position
         })
     })
 }
