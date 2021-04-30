@@ -43,10 +43,14 @@ io.on('connection', (sock) => {
 
 const updateCurrentConnections = async () => {
     const clients = await io.fetchSockets();
-    Object.keys(game.players).forEach(key => {
-        if(!Array.from(clients).includes(key)) {
-            game.players = game.players.filter(p => p.id == key);
-            lobby.lobby = lobby.lobby.filter(p => p.id == key);
-        }
+    const players = [];
+    Object.entries(game.players).forEach(player => {
+        const [key, value] = player;
+        Object.values(clients).forEach(client => {
+            if(client.id == key) players.push(value);
+        });
     });
+    game.players = [];
+    clearInterval(game.updateInterval);
+    lobby.lobby = [];
 }

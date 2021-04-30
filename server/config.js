@@ -12,9 +12,9 @@ const config = {
          * Defines height of the map.
          */
         height: 32
-    },
+    }, 
     /**
-     * JSON containing costs of all buildings and units.
+     * JSON containing costs of all buildings and logs.
      */
     costs: {
         base: {
@@ -23,12 +23,21 @@ const config = {
             stone: 100,
             food: 100
         },
+        farm: {
+            gold: 20,
+            wood: 20,
+            stone: 20,
+            food: 20
+        },
         worker: {
             gold: 10,
             wood: 10,
             stone: 10,
             food: 10
         }
+    },
+    capacities: {
+        farm: 10
     },
     lobby: {
         capacity: 1,
@@ -51,10 +60,10 @@ const config = {
              food: 100
          },
          workers: {
-            gold: 1,
-            wood: 1,
-            stone: 1,
-            food: 1
+            gold: 10,
+            wood: 10,
+            stone: 10,
+            food: 10
          }
     }
 }

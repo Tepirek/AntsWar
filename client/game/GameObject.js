@@ -1,5 +1,7 @@
 class GameObject {
-    constructor(posX, posY, areaSize, name, color, game) {
+    constructor(id, owner, posX, posY, areaSize, name, color, game) {
+        this.id = id;
+        this.owner = owner;
         this.position = {
             x: posX,
             y: posY
@@ -14,6 +16,9 @@ class GameObject {
     };
 };
 
+/**
+ * Sets the style for the gameObject.
+ */
 GameObject.prototype.setStyle = function() {
     this.gameObject.style = `
         position:absolute;
@@ -26,6 +31,9 @@ GameObject.prototype.setStyle = function() {
     `;
 }
 
+/**
+ * Displays the object
+ */
 GameObject.prototype.draw = function() {
     document.querySelector('.gameBoard').appendChild(this.gameObject);
 };

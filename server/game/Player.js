@@ -8,7 +8,13 @@ class Player {
      * @param {username} username 
      */
     constructor(socket, id, username) {
+        /**
+         * Player's socket.
+         */
         this.socket = socket;
+        /**
+         * Player's ID.
+         */
         this.id = id;
         /**
          * Defines the name of the player.
@@ -30,8 +36,6 @@ class Player {
          * Array containing player's game objects.
          */
         this.gameObjects = [];
-
-        this.buy;
     }
 }
 
@@ -52,10 +56,13 @@ Player.prototype.init = function(color) {
 Player.prototype.updateResources = function() {
     Object.entries(this.resources).forEach(resource => {
         const [key, value] = resource;
-        this.resources[key]++;
+        this.resources[key] += this.workers[key];
     });
     this.socket.emit('player__setResources', {
        resources: this.resources 
+    });
+    this.socket.emit('player__setWorkers', {
+        workers: this.workers
     });
 }
 
@@ -64,13 +71,20 @@ Player.prototype.updateResources = function() {
  * @param {String} type Type of the object being purchased.
  */
 Player.prototype.buy = function(type) {
-    console.log("CONFIG");
-    console.log(config.player.resources);
     Object.entries(this.resources).forEach(resource => {
         const [key, value] = resource;
         this.resources[`${key}`] -= costs[`${type}`][`${key}`];
     });
 }
+
+Player.prototype.addNewWorker = function(type) {
+    switch(type.toLowerCase()) {
+        case 'farm': 
+            type = 'food';
+            break;
+    }
+    this.workers[`${type}`] += 1;
+} 
 
 Player.prototype.addGameObject = function(gameObject) {
     this.gameObjects.push(gameObject);

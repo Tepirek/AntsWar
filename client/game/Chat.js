@@ -12,6 +12,11 @@ class Chat {
     };
 };
 
+
+/**
+ * Initializes the chat. 
+ * @param {response} response Server message in the form: 
+ */
 Chat.prototype.init = function (response) {
     let config = JSON.parse(localStorage.getItem('config'));
     this.chat.innerHTML = `
@@ -52,6 +57,9 @@ Chat.prototype.init = function (response) {
     this.socket.emit('chat_init');
 };
 
+/**
+ * Sends chat messages to the server.
+ */
 Chat.prototype.onChatSubmitted = function (e) {
     e.preventDefault();
     const text = this.input.value;
@@ -61,6 +69,9 @@ Chat.prototype.onChatSubmitted = function (e) {
     this.input.value = '';
 };
 
+/**
+ * Receives a chat message from the server.
+ */
 Chat.prototype.log = function(msg) {
     const li = document.createElement('li');
     const author = (msg.author) ? `[${msg.author}]` : '';

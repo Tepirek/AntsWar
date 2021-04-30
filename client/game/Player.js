@@ -8,10 +8,11 @@ class Player {
         this.socket = sock;
         this.socket.on('player__init', response => this.init(response));
         this.socket.on('player__setResources', response => this.__setResources(response));
+        this.socket.on('player__setWorkers', response => this.__setWorkers(response));
     }
 }
 
-Player.prototype.init = function(response) {        
+Player.prototype.init = function(response) {       
     this.id = response.id;
     this.color = response.color;
     this.resources = response.resources;
@@ -74,6 +75,24 @@ Player.prototype.createBuilding = function(name) {
     buildings.appendChild(building);
 };
 
+Player.prototype.addNewWorker = function(type) {
+    switch(type.toLowerCase()) {
+        case 'farm': 
+            type = 'food';
+            break;
+    }
+    this.workers[`${type}`] += 1;
+} 
+
+Player.prototype.addNewWorker = function(type) {
+    switch(type.toLowerCase()) {
+        case 'farm': 
+            type = 'food';
+            break;
+    }
+    this.workers[`${type}`] += 1;
+} 
+
 Player.prototype.__setResources = function(response) {
     this.resources = response.resources;
     this.printResources();
@@ -81,4 +100,8 @@ Player.prototype.__setResources = function(response) {
 
 Player.prototype.__setWorkers = function(response) {
     this.workers = response.workers;
+}
+
+Player.prototype.addGameObject = function(gameObject) {
+    this.gameObjects.push(gameObject);
 }

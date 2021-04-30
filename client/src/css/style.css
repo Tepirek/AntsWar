@@ -13,8 +13,10 @@ body {
 
 .backgroundImage {
     position: absolute;
-    top: -45%;
-    transform: translateY(45%);
+    top: 0px;
+    width: 800px;
+    height: 400px;
+    object-fit: none;
 }
 
 .container {
@@ -53,12 +55,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
+    visibility: hidden;
 }
 
-.buildings, .objectOptions, .units, .chatButton {
+.buildings, .objectOptions, .chatButton {
     text-align: center;
     padding: 10px;
     margin: 10px;
+    height: auto;
     border: 1px solid #1be393;
     border-radius: 20px;
     display: flex;
@@ -73,14 +77,21 @@ body {
 }
 
 .buildings {
+    display: inline-flex;
     flex: 1 auto;
+    flex-wrap: wrap;
+    max-width: 250px;
+}
+
+.buildingPrototype {
+    margin: 5px;
 }
 
 .objectOptions {
     flex: 1 auto;
 }
 
-.units {
+.logs {
     flex: 6 auto;
 }
 
@@ -139,12 +150,12 @@ button:hover {
     background-color: #083a8a;
 }
 
-.chat ul {
+.chat ul, .logs ul {
     list-style: none;
     overflow-y: scroll;
 }
 
-.chat ul > li {
+.chat ul > li, .logs ul > li {
     padding: 5px;
     margin: 0px 5px;
     border-bottom: 1px solid #bababa;
@@ -193,4 +204,21 @@ button:hover {
 
 #events {
     height: 30vh;
+}
+
+.logs {
+    text-align: center;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #1be393;
+    border-radius: 20px;
+}
+#logsList {
+    height: 148px;
+    list-style: none;
+    overflow-y: scroll;
+}
+
+.errorMsg {
+    color:#ff0000;
 }

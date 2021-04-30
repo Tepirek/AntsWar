@@ -1,13 +1,8 @@
 class Base extends Building {
     constructor(config) {
-        super(config.x, config.y, config.size, 'Base', config.color, config.game, 50, { 
-            gold: 20, 
-            wood: 20, 
-            stone: 20, 
-            food: 20 
-        });
+        super(config.id, config.owner, config.x, config.y, config.size, 'Base', config.color, config.game, 50, config.costs);
         this.workers = 0;
-        this.capacity = 500;
+        this.capacity = 5;
         this.gameObject.onclick = (res) => {
             // reset wyboru budynku ze sklepu
             localStorage.setItem('action', JSON.stringify({ type: '', target: '' }));
@@ -16,9 +11,10 @@ class Base extends Building {
     };
 };
 
-
-
-Base.prototype.showOptions = function(res) {
+/**
+ * Shows options and start adding an squad, support for sending a request to be added in the game class.
+ */
+Base.prototype.showOptions = function() {
     const buildings = document.querySelector('.objectOptions');
  
     buildings.innerHTML = `
@@ -39,13 +35,14 @@ Base.prototype.showOptions = function(res) {
         </tr>
     </table>    
     `;
+
     document.querySelector('#addWorker').onclick = () => {
         this.game.addNewWorker(this);
     }
+
     document.querySelector('#addSquad').onclick = () => {
         if(this.workers + 1 <= this.capacity) {
             localStorage.setItem('action', JSON.stringify({ type: 'drag', target: `squad` }));
-            this.workers++;
         }
     }
 }

@@ -10,6 +10,9 @@ class Lobby {
     };
 };
 
+/**
+ * Initializes the lobby.
+ */
 Lobby.prototype.init = function() {
     this.lobby = document.querySelector('.lobby');
     this.lobby.innerHTML = `

@@ -1,4 +1,5 @@
 const uniqueID = require("uuid").v4;
+const getDate = require("../functions").getDate;
 const config = require("../config").config;
 const costs = config.costs;
 
@@ -13,6 +14,7 @@ class Game {
          * Array containing players.
          */
         this.players = [];
+        this.updateInterval;
     }
 }
 
@@ -40,7 +42,8 @@ Game.prototype.init = function() {
     Object.values(this.players).forEach(player => {
         this.io.to(player.id).emit('game__init', {
             config: config.params,
-            map: map
+            map: map,
+            costs: config.costs
         });
     });
     Object.values(this.players).forEach(player => {
@@ -56,7 +59,7 @@ Game.prototype.init = function() {
  * Updates game parameters every second.
  */
 Game.prototype.update = function() {
-    setInterval(() => {
+    this.updateInterval = setInterval(() => {
         Object.values(this.players).forEach(player => {
             player.updateResources();
         });
@@ -115,7 +118,6 @@ Game.prototype.__addNewBuilding = function(request) {
         const index = request.position.x * config.params.width + request.position.y;
         const gameObject = this.getGameObject(owner, request.type, request.position);
         owner.buy(request.type);
-        console.log(owner.resources);
         owner.addGameObject(gameObject);
         this.gameObjects[index] = gameObject;
         Object.values(this.players).forEach(player => {
@@ -130,7 +132,10 @@ Game.prototype.__addNewBuilding = function(request) {
     }
     else {
         this.io.to(request.id).emit('game__error', {
-
+            date: getDate(),
+            author: owner.username,
+            type: 'error',
+            message: 'Unable to build this structure!'
         });
     }
 }
@@ -138,8 +143,19 @@ Game.prototype.__addNewBuilding = function(request) {
 /**
  * Adds a new worker to a given building.
  */
-Game.prototype.__addNewWorker = function(player, id) {
-    
+Game.prototype.__addNewWorker = function(request) {
+    let gameObject;
+    for(let i = 0; i < this.gameObjects.length; i++) {
+        gameObject = this.gameObjects[i];
+        if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.capacity) {
+            gameObject['workers'] += 1;
+            this.players[`${request.object.owner}`].addNewWorker(request.object.name);
+            this.io.to(request.object.owner).emit('game__addNewWorker', {
+                id: request.object.id,
+                workers: gameObject['workers']
+            });
+        }
+    }
 }
 
 /**
@@ -148,11 +164,12 @@ Game.prototype.__addNewWorker = function(player, id) {
  * @param {String} type Type of the object being purchased.
  */
 Game.prototype.canBuy = function(player, type) {
+    let ret = { value: true };
     Object.entries(player.resources).forEach(resource => {
         const [key, value] = resource;
-        if(value < costs[`${type}`][`${key}`]) return { value: false, message: 'Not enough resources to build this structure!' };
+        if(value < costs[`${type}`][`${key}`]) ret = { value: false, message: 'Not enough resources to build this structure!' };
     });
-    return { value: true };
+    return ret;
 }
 /**
  * Checks if an object can be placed at the given position.
@@ -180,6 +197,10 @@ Game.prototype.getGameObject = function(player, type, position) {
         case 'base':
             gameObject['capacity'] = 0;
             break;
+        case 'farm':
+            gameObject['workers'] = 1;
+            player.addNewWorker('farm');
+            gameObject['capacity'] = config.capacities[`${type}`];
         default:
             break;
     }
