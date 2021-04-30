@@ -14,7 +14,30 @@
     <div class="container">
       <img class="backgroundImage" src="src/img/antBackground.gif"/>
       <div class="game">
-        <div class="stats"></div>
+        <div class="resources">
+          <ul>
+            <li>
+              Gold
+              <span id="gold">
+              </span>
+            </li>
+            <li>
+              Wood
+          <span id="wood">
+          </span>
+            </li>
+            <li>
+              Stone
+          <span id="stone">
+          </span>
+            </li>
+            <li>
+              Food
+          <span id="food">
+          </span>
+            </li>
+          </ul>
+        </div>
         <div class="gameBoard"></div>
         <div class="gameOptions">
           <div class="buildings"></div>
@@ -28,12 +51,15 @@
       </div>
       <div class="chat"></div>
       <div class="lobby"></div>
+      <div class="error"></div>
     </div>
     
     <script src="game/GameObject.js"></script>
     <script src="game/Building.js"></script>
     <script src="game/Base.js"></script>
     <script src="game/Area.js"></script>
+    
+    <script src="game/Player.js"></script>
     <script src="game/Chat.js"></script>
     <script src="game/Game.js"></script>
     <script src="game/Lobby.js"></script>

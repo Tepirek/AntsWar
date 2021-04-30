@@ -24,29 +24,38 @@ Lobby.prototype.init = function() {
 }
 
 Lobby.prototype.join = function(game, sock, request) {
+    if(this.lobby.filter(player => player.username == request.username).length) {
+        sock.emit('lobby__error', {
+            message: "Name is already taken!"
+        });
+        return;
+    }
     const data = {
         id: sock.id,
         username: request.username,
         date: getDate()
     };
     const player = new Player(
+        sock,
         sock.id,
         request.username
     );
     this.lobby.push(data);
-    sock.emit('lobby__connected', data);
-    this.io.emit('lobby__players', {
-        lobby: this.lobby,
-        capacity: config.lobby.capacity
-    });
     game.addNewPlayer(player);
-    // if(this.isFull()) {
+    sock.emit('lobby__connected', data);
+    Object.keys(game.players).forEach(key => {
+        this.io.to(key).emit('lobby__players', {
+            lobby: this.lobby,
+            capacity: config.lobby.capacity
+        });
+    });
+    if(this.isFull()) {
         this.io.emit('game__prepare', {});
         setTimeout(() => {
             game.init();
             game.update();
         }, config.lobby.delay);
-    // }
+    }
 }
 
 Lobby.prototype.isFull = function() {

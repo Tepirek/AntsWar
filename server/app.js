@@ -26,6 +26,7 @@ const lobby = new Lobby(io);
 const chat = new Chat(io);
 
 io.on('connection', (sock) => {
+    updateCurrentConnections();
     console.log("Someone connected to the server! [" + sock.id + "]");
 
     // LOBBY EVENTS
@@ -39,3 +40,13 @@ io.on('connection', (sock) => {
     sock.on('game_addNewBuilding', (request) => game.__addNewBuilding(request));
     sock.on('game_addNewWorker', (request) => game.__addNewWorker(request));
 });
+
+const updateCurrentConnections = async () => {
+    const clients = await io.fetchSockets();
+    Object.keys(game.players).forEach(key => {
+        if(!Array.from(clients).includes(key)) {
+            game.players = game.players.filter(p => p.id == key);
+            lobby.lobby = lobby.lobby.filter(p => p.id == key);
+        }
+    });
+}

@@ -61,9 +61,12 @@ body {
     margin: 10px;
     border: 1px solid #1be393;
     border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
 }
 
-.units:hover, .chatButton:hover {
+.chatButton:hover {
     background-color: #1be393;
     transition: 1s;
     cursor: pointer;
@@ -85,13 +88,13 @@ body {
     flex: 1 auto;
 }
 
-.stats {
+.resources {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
 }
 
-.stats ul {
+.resources ul {
     list-style: none;
     display: flex;
     align-items: center;
@@ -99,7 +102,7 @@ body {
     border-bottom: 1px solid #ffee00;
 }
 
-.stats ul > li {
+.resources ul > li {
     margin: 10px;
 }
 
@@ -167,6 +170,25 @@ button:hover {
   
 .chat-wrapper form button {
     width: 100px;
+}
+
+.error {
+    position: absolute;
+    transform: translate(0, 20vh);
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #1be393;
+    background-color: #b82117;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    visibility: hidden;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 #events {

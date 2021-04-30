@@ -6,6 +6,7 @@ class Lobby {
         this.socket.on('game__prepare', (response) => {
             this.lobbyPrepare(response);
         });
+        this.socket.on('lobby__error', response => this.__error(response));
     };
 };
 
@@ -68,4 +69,16 @@ Lobby.prototype.lobbyPrepare = function(response) {
         let time = parseInt(timer.innerHTML.split('za ')[1].split('s')[0]);
         timer.innerHTML = `Gra rozpocznie się za ${parseInt(--time)}s`;
     }, 1000);
+}
+
+Lobby.prototype.__error = function(response) {
+    const error = document.querySelector('.error'); 
+    error.style.visibility = 'visible';
+    error.innerHTML = `
+        ${response.message}
+    `;
+    setTimeout(() => {
+        error.innerHTML = "";
+        error.style.visibility = 'hidden';
+    }, 3000);
 }

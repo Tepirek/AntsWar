@@ -17,7 +17,18 @@ const config = {
      * JSON containing costs of all buildings and units.
      */
     costs: {
-
+        base: {
+            gold: 100,
+            wood: 100,
+            stone: 100,
+            food: 100
+        },
+        worker: {
+            gold: 10,
+            wood: 10,
+            stone: 10,
+            food: 10
+        }
     },
     lobby: {
         capacity: 1,
@@ -38,6 +49,12 @@ const config = {
              wood: 100,
              stone: 100,
              food: 100
+         },
+         workers: {
+            gold: 1,
+            wood: 1,
+            stone: 1,
+            food: 1
          }
     }
 }

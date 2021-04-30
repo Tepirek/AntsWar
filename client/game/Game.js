@@ -24,6 +24,8 @@ Game.prototype.init = function(response) {
     document.querySelector('.container').removeChild(antBg);
     document.querySelector('.container').removeChild(footer);
     document.querySelector('.container').removeChild(lobby);
+    document.querySelector('.buildings').style.height = "100px";
+    document.querySelector('.objectOptions').style.height = "100px";
     this.config = response.config;
     this.map = response.map;
     this.cost = response.costs;
@@ -33,7 +35,7 @@ Game.prototype.init = function(response) {
     for(let i = 0; i < this.config.height; i++) {
         for(let j = 0; j < this.config.width; j++) {
             const index = i*this.config.width + j;
-            let area = new Area(i, j, this.config.areaSize, 'grass', 1, this);
+            let area = new Area(i, j, this.config.areaSize, 'grass', 0, this);
             this.map[index] = area;
         }
     }
@@ -47,15 +49,13 @@ Game.prototype.handleData = function(event) {
 
 };
 
-Game.prototype.addNewBuilding = function(response) {
+Game.prototype.addNewBuilding = function() {
 
 };
 
 Game.prototype.__addNewBuilding = function(response) {
-    const index = response.position.x*this.config.width + response.position.y;
-    console.log(response);
-    const building = this.getBuilding(response.position, response.target, response.color);
-    console.log(building);
+    const index = response.position.x * this.config.width + response.position.y;
+    const building = this.getBuilding(response.position, response.type, response.color);
     this.map[index].setFree(false);
     this.map[index].setObject(building);
     delete this.map[index];

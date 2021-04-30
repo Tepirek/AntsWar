@@ -1,3 +1,4 @@
+const uniqueID = require("uuid").v4;
 const config = require("../config").config;
 const costs = config.costs;
 
@@ -7,7 +8,7 @@ class Game {
         /**
          * Array containing game objects.
          */
-        this.map = [];
+        this.gameObjects = [];
         /**
          * Array containing players.
          */
@@ -19,31 +20,36 @@ class Game {
  * Initialization of the game. Creating array of default objects and bases at initial positions.
  */
 Game.prototype.init = function() {
+    const map = [];
     for(let i = 0; i < config.params.width; i++) {
         for(let j = 0; j < config.params.width; j++) {
-            this.map[i * config.params.width + j] = 0;
+            let index = i * config.params.width + j; 
+            map[index] = 0;
+            this.gameObjects[index] = {
+                id: uniqueID(),
+                type: 'area',
+                owner: 'default'
+            };
         }
     }
     let color = 0;
     Object.values(this.players).forEach(player => {
         player.init(color);
-        console.log(player);
         color++;
-    })
-    color = 0;
+    });
     Object.values(this.players).forEach(player => {
         this.io.to(player.id).emit('game__init', {
             config: config.params,
-            map: this.map
+            map: map
         });
+    });
+    Object.values(this.players).forEach(player => {
         this.__addNewBuilding({
             id: player.id,
-            target: 'base',
-            color: color,
+            type: 'base',
             position: player.initCoords
         });
-        color++;
-    })
+    });
 }
 
 /**
@@ -52,13 +58,14 @@ Game.prototype.init = function() {
 Game.prototype.update = function() {
     setInterval(() => {
         Object.values(this.players).forEach(player => {
-            player.updateStats();
-        })
-    })
+            player.updateResources();
+        });
+    }, 1000);
 }
 
 /**
  * Adds a new player to the game.
+ * @param {player} player
  */
 Game.prototype.addNewPlayer = function(player) {
     if(!Object.keys(this.players).includes(player.id)) {
@@ -68,9 +75,19 @@ Game.prototype.addNewPlayer = function(player) {
 }
 
 /**
- * 
+ * Removes a player from the game.
+ * @param {id} id 
  */
+Game.prototype.removePlayer = function(id) {
+    if(Object.keys(this.players).includes(id)) {
+        this.players = this.players.filter(p => p.id != id);
+    }
+}
 
+/**
+ * Returns player object that has the given id.
+ * @param {id} id 
+ */
 Game.prototype.getPlayer = function(id) {
     if(Object.keys(this.players).includes(id)) {
         return this.players[`${id}`];
@@ -78,7 +95,7 @@ Game.prototype.getPlayer = function(id) {
 };
 
 /**
- * 
+ * Displays all players.
  */
 Game.prototype.displayPlayers = function() {
     Object.entries(this.players).forEach(player => {
@@ -91,21 +108,82 @@ Game.prototype.displayPlayers = function() {
  * Adds a new building to the map.
  */
 Game.prototype.__addNewBuilding = function(request) {
-    Object.values(this.players).forEach(player => {
-        this.io.to(player.id).emit('game__addNewBuilding', {
-            owner: request.id,
-            target: request.target,
-            color: request.color,
-            position: request.position
-        })
-    })
+    const owner = this.players[`${request.id}`];
+    const canBuy = this.canBuy(owner, request.type);
+    const canBuild = this.canBuild(request.position);
+    if(canBuy.value === true && canBuild.value === true) {
+        const index = request.position.x * config.params.width + request.position.y;
+        const gameObject = this.getGameObject(owner, request.type, request.position);
+        owner.buy(request.type);
+        console.log(owner.resources);
+        owner.addGameObject(gameObject);
+        this.gameObjects[index] = gameObject;
+        Object.values(this.players).forEach(player => {
+            this.io.to(player.id).emit('game__addNewBuilding', {
+                id: this.gameObjects[index].id,
+                owner: player.id,
+                type: request.type,
+                color: owner.color,
+                position: request.position
+            });
+        });
+    }
+    else {
+        this.io.to(request.id).emit('game__error', {
+
+        });
+    }
 }
 
 /**
  * Adds a new worker to a given building.
  */
-Game.prototype.__addNewWorker = function() {
+Game.prototype.__addNewWorker = function(player, id) {
+    
+}
 
+/**
+ * Checks if player can buy an object of the given type.
+ * @param {Player} player Player object.
+ * @param {String} type Type of the object being purchased.
+ */
+Game.prototype.canBuy = function(player, type) {
+    Object.entries(player.resources).forEach(resource => {
+        const [key, value] = resource;
+        if(value < costs[`${type}`][`${key}`]) return { value: false, message: 'Not enough resources to build this structure!' };
+    });
+    return { value: true };
+}
+/**
+ * Checks if an object can be placed at the given position.
+ */
+Game.prototype.canBuild = function(position) {
+    const index = position.x * config.params.width + position.y;
+    if(this.gameObjects[index].type === 'area') return { value: true };
+    return { value: false, message: `Can't build at { x: ${position.x}, y: ${position.y} }` };
+}
+
+/**
+ * Returns an object of the given type.
+ * @param {Player} player Player object.
+ * @param {String} type Type of the object being purchased.
+ * @param {position} position Position of the object.
+ */
+Game.prototype.getGameObject = function(player, type, position) {
+    const index = position.x * config.params.width + position.y;
+    const gameObject = {
+        id: uniqueID(),
+        owner: player.id,
+        type: type
+    };
+    switch(type) {
+        case 'base':
+            gameObject['capacity'] = 0;
+            break;
+        default:
+            break;
+    }
+    return gameObject;
 }
 
 module.exports = {
