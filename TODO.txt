@@ -1,0 +1,8 @@
+
+1) paski życia budynków, włącz/wyłącz tabulatorem
+2) dodawanie wojowników w oddziałach mrówek
+3) globalny force limit
+4) max ileś oddziałów mrówek dla jednej bazy
+5) poruszanie się oddziałów mrówek
+6) mgła wojny
+7) mapa hexagonalna

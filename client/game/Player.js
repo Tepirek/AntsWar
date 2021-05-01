@@ -77,21 +77,21 @@ Player.prototype.createBuilding = function(name) {
 
 Player.prototype.addNewWorker = function(type) {
     switch(type.toLowerCase()) {
+        case 'mine':
+            type = 'gold';
+            break;
+        case 'sawmill':
+            type = 'wood';
+            break;
+        case 'quarry':
+            type = 'stone';
+            break;
         case 'farm': 
             type = 'food';
             break;
     }
     this.workers[`${type}`] += 1;
-} 
-
-Player.prototype.addNewWorker = function(type) {
-    switch(type.toLowerCase()) {
-        case 'farm': 
-            type = 'food';
-            break;
-    }
-    this.workers[`${type}`] += 1;
-} 
+}
 
 Player.prototype.__setResources = function(response) {
     this.resources = response.resources;
@@ -102,6 +102,9 @@ Player.prototype.__setWorkers = function(response) {
     this.workers = response.workers;
 }
 
+/**
+ * Adds gameObject
+ */
 Player.prototype.addGameObject = function(gameObject) {
     this.gameObjects.push(gameObject);
 }

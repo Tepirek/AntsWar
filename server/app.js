@@ -39,6 +39,7 @@ io.on('connection', (sock) => {
     // GAME EVENTS
     sock.on('game_addNewBuilding', (request) => game.__addNewBuilding(request));
     sock.on('game_addNewWorker', (request) => game.__addNewWorker(request));
+    sock.on('game_addNewSquad', request => game.__addNewSquad(request));
 });
 
 const updateCurrentConnections = async () => {
@@ -51,6 +52,6 @@ const updateCurrentConnections = async () => {
         });
     });
     game.players = [];
-    clearInterval(game.updateInterval);
     lobby.lobby = [];
+    clearInterval(game.updateInterval);
 }

@@ -7,6 +7,7 @@ class Game {
         this.socket = sock;
         this.socket.on('game__init', (response) => {
             this.init(response);
+            this.initGUI();
         });
         this.socket.on('game__updateStats', (response) => {
             this.__updateStats(response);
@@ -15,15 +16,15 @@ class Game {
             this.__addNewBuilding(response);
         });
         this.socket.on('game__addNewWorker', response => this.__addNewWorker(response));
+        this.socket.on('game__addNewSquad', response => this.__addNewSquad(response));
         this.socket.on('game__error', response => this.__error(response));
     }
 };
 
 /**
- * Initializes the game. 
- * @param {response} response Server message in the form: 
+ * Initializes the GUI.  
  */
-Game.prototype.init = function(response) {
+Game.prototype.initGUI = function() {
     document.body.style.backgroundColor = '#333333';
     const antBg = document.querySelector('.backgroundImage');
     const footer = document.querySelector('.footer');
@@ -32,12 +33,19 @@ Game.prototype.init = function(response) {
     document.querySelector('.container').removeChild(footer);
     document.querySelector('.container').removeChild(lobby);
     document.querySelector('.gameOptions').style.visibility = "visible";
-    this.config = response.config;
-    this.map = response.map;
-    this.costs = response.costs;
     this.gameBoard.style.width = `${this.config.width * this.config.areaSize}px`;
     this.gameBoard.style.height = `${this.config.height * this.config.areaSize}px`;
     this.gameOptions.style.width = `${this.config.width * this.config.areaSize}px`;
+}
+
+/**
+ * Initializes the game. 
+ * @param {response} response Server message in the form: 
+ */
+Game.prototype.init = function(response) {
+    this.config = response.config;
+    this.map = response.map;
+    this.costs = response.costs;
     for(let i = 0; i < this.config.height; i++) {
         for(let j = 0; j < this.config.width; j++) {
             const index = i*this.config.width + j;
@@ -63,11 +71,10 @@ Game.prototype.addNewBuilding = function(position, type) {
 /**
  * Handles responses from the server to a request to add a building.
  * @param {response} response Server response in the form: 
- * 
  */
 Game.prototype.__addNewBuilding = function(response) {
     const index = response.position.x * this.config.width + response.position.y;
-    const building = this.getBuilding(response.id, response.owner, response.position, response.type, response.color, response.costs);
+    const building = this.getBuilding(response);
     this.map[index].setFree(false);
     this.map[index].setObject(building);
     delete this.map[index];
@@ -80,7 +87,8 @@ Game.prototype.__addNewBuilding = function(response) {
  */
 Game.prototype.addNewWorker = function(object) {
     this.socket.emit('game_addNewWorker', {
-        object: object
+        object: object,
+        player: this.player.id
     });
 }
 
@@ -92,14 +100,31 @@ Game.prototype.__addNewWorker = function(response) {
     for(let i = 0; i < this.map.length; i++) {
         if(this.map[i].id === response.id) {
             this.map[i].workers = response.workers;
+            this.map[i].gameObject.click();
             this.player.addNewWorker(this.map[i].name);
+            this.player.printResources();
             break;
         }
     }
 };
 
+/**
+ * Sends a request to add a new squad to the server.
+ */
 Game.prototype.addNewSquad = function(position) {
+    this.socket.emit('game_addNewSquad', {
+        id: this.player.id,
+        position: position
+    });
+}
 
+Game.prototype.__addNewSquad = function(response) {
+    const index = response.position.x * this.config.width + response.position.y;
+    const building = this.getBuilding(response);
+    this.map[index].setFree(false);
+    this.map[index].setObject(building);
+    delete this.map[index];
+    this.map[index] = building;
 }
 
 /**
@@ -108,25 +133,48 @@ Game.prototype.addNewSquad = function(position) {
  * @param {type} type Type of the building.
  * @param {color} color Color of the building.
  */
-Game.prototype.getBuilding = function(id, owner, position, type, color) {
+Game.prototype.getBuilding = function(response) {
     let config = {
-        id: id,
-        owner: owner,
-        x: position.x, 
-        y: position.y, 
+        id: response.id,
+        owner: response.owner,
+        x: response.position.x, 
+        y: response.position.y, 
         size: this.config.areaSize, 
         game: this,
-        color: color,
-        costs: this.costs[`${type}`]
+        color: response.color,
+        costs: this.costs[`${response.type}`]
     };
     let building;
-    if(type == 'tower') building = new Tower(config);
-    else if(type == 'mine') building = new Mine(config);
-    else if(type == 'sawmill') building = new Sawmill(config);
-    else if(type == 'quarry') building = new Quarry(config);
-    else if(type == 'farm') building = new Farm(config);
-    else if(type == 'base') building = new Base(config);
-    else if(type == 'squad') building = new Squad(config);
+    switch(response.type) {
+        case 'tower':
+            building = new Tower(config);
+            break;
+        case 'mine': 
+            building = new Mine(config);
+            building.workers = response.workers;
+            break;
+        case 'sawmill': 
+            building = new Sawmill(config);
+            building.workers = response.workers;
+            break;
+        case 'quarry': 
+            building = new Quarry(config);
+            building.workers = response.workers;
+            break;
+        case 'farm': 
+            building = new Farm(config);
+            building.workers = response.workers;
+            break;
+        case 'base': 
+            building = new Base(config);
+            break;
+        case 'squad': 
+            building = new Squad(config);
+            building.workers = response.workers;
+            break;
+        default:
+            break;
+    }
     return building;
 };
 
@@ -136,7 +184,6 @@ Game.prototype.getBuilding = function(id, owner, position, type, color) {
  */
 Game.prototype.__error = function(response) {
     const logs = document.querySelector('#logsList');
-    
     const li = document.createElement('li');
     const author = (response.author) ? `[${response.author}]` : '';
     li.innerHTML = `<small>${response.date} ${author}</small> - ${response.message}`;

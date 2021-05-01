@@ -17,11 +17,29 @@ const config = {
      * JSON containing costs of all buildings and logs.
      */
     costs: {
-        base: {
-            gold: 100,
-            wood: 100,
-            stone: 100,
-            food: 100
+        tower: {
+            gold: 20,
+            wood: 20,
+            stone: 20,
+            food: 20
+        },
+        mine: {
+            gold: 20,
+            wood: 20,
+            stone: 20,
+            food: 20
+        },
+        sawmill: {
+            gold: 20,
+            wood: 20,
+            stone: 20,
+            food: 20
+        },
+        quarry: {
+            gold: 20,
+            wood: 20,
+            stone: 20,
+            food: 20
         },
         farm: {
             gold: 20,
@@ -29,15 +47,32 @@ const config = {
             stone: 20,
             food: 20
         },
-        worker: {
+        base: {
+            gold: 100,
+            wood: 100,
+            stone: 100,
+            food: 100
+        },
+        workers: {
             gold: 10,
             wood: 10,
             stone: 10,
             food: 10
+        },
+        squad: {
+            gold: 20,
+            wood: 20,
+            stone: 20,
+            food: 20
         }
     },
     capacities: {
-        farm: 10
+        tower: 10,
+        mine: 10,
+        sawmill: 10,
+        quarry: 10,
+        farm: 10,
+        base: 10
     },
     lobby: {
         capacity: 1,
@@ -60,10 +95,10 @@ const config = {
              food: 100
          },
          workers: {
-            gold: 10,
-            wood: 10,
-            stone: 10,
-            food: 10
+            gold: 100,
+            wood: 100,
+            stone: 100,
+            food: 100
          }
     }
 }

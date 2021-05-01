@@ -62,13 +62,14 @@ Game.prototype.update = function() {
     this.updateInterval = setInterval(() => {
         Object.values(this.players).forEach(player => {
             player.updateResources();
+            player.updateWorkers();
         });
     }, 1000);
 }
 
 /**
  * Adds a new player to the game.
- * @param {player} player
+ * @param {player} player Player to add.
  */
 Game.prototype.addNewPlayer = function(player) {
     if(!Object.keys(this.players).includes(player.id)) {
@@ -79,7 +80,7 @@ Game.prototype.addNewPlayer = function(player) {
 
 /**
  * Removes a player from the game.
- * @param {id} id 
+ * @param {id} id Player's id.
  */
 Game.prototype.removePlayer = function(id) {
     if(Object.keys(this.players).includes(id)) {
@@ -89,7 +90,7 @@ Game.prototype.removePlayer = function(id) {
 
 /**
  * Returns player object that has the given id.
- * @param {id} id 
+ * @param {id} id Player's id.
  */
 Game.prototype.getPlayer = function(id) {
     if(Object.keys(this.players).includes(id)) {
@@ -109,6 +110,7 @@ Game.prototype.displayPlayers = function() {
 
 /**
  * Adds a new building to the map.
+ * @param {request} request Request from the client.
  */
 Game.prototype.__addNewBuilding = function(request) {
     const owner = this.players[`${request.id}`];
@@ -118,15 +120,16 @@ Game.prototype.__addNewBuilding = function(request) {
         const index = request.position.x * config.params.width + request.position.y;
         const gameObject = this.getGameObject(owner, request.type, request.position);
         owner.buy(request.type);
-        owner.addGameObject(gameObject);
         this.gameObjects[index] = gameObject;
+        owner.addGameObject(gameObject);
         Object.values(this.players).forEach(player => {
             this.io.to(player.id).emit('game__addNewBuilding', {
-                id: this.gameObjects[index].id,
+                id: gameObject.id,
                 owner: player.id,
                 type: request.type,
                 color: owner.color,
-                position: request.position
+                position: request.position,
+                workers: gameObject.workers
             });
         });
     }
@@ -142,19 +145,51 @@ Game.prototype.__addNewBuilding = function(request) {
 
 /**
  * Adds a new worker to a given building.
+ * @param {request} request Request from the client.
  */
 Game.prototype.__addNewWorker = function(request) {
-    let gameObject;
-    for(let i = 0; i < this.gameObjects.length; i++) {
-        gameObject = this.gameObjects[i];
-        if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.capacity) {
-            gameObject['workers'] += 1;
-            this.players[`${request.object.owner}`].addNewWorker(request.object.name);
-            this.io.to(request.object.owner).emit('game__addNewWorker', {
-                id: request.object.id,
-                workers: gameObject['workers']
-            });
+    const player = this.players[`${request.object.owner}`];
+    if(this.players[`${request.player}`].gameObjects.some(o => o.id === request.object.id)) {
+        let gameObject;
+        for(let i = 0; i < this.gameObjects.length; i++) {
+            gameObject = this.gameObjects[i];
+            const canBuy = this.canBuy(player, 'workers');
+            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.capacity && canBuy.value === true) {
+                player.buy('workers');
+                gameObject.workers += 1;
+                player.addNewWorker(gameObject.type);
+                this.io.to(request.object.owner).emit('game__addNewWorker', {
+                    id: request.object.id,
+                    workers: gameObject['workers']
+                });
+            }
         }
+    }   
+}
+
+Game.prototype.__addNewSquad = function(request) {
+    const owner = this.players[`${request.id}`];
+    const canBuy = this.canBuy(owner, 'squad');
+    const canMove = this.canMove(request.position);
+    if(canBuy.value === true && canMove.value === true) {
+        const index = request.position.x * config.params.width + request.position.y;
+        const gameObject = this.getGameObject(owner, request.type, request.position);
+        owner.buy('squad');
+        this.gameObjects[index] = gameObject;
+        owner.addGameObject(gameObject);
+        Object.values(this.players).forEach(player => {
+            this.io.to(player.id).emit('game__addNewSquad', {
+                id: gameObject.id,
+                owner: player.id,
+                type: request.type,
+                color: owner.color,
+                position: request.position,
+                type: 'squad',
+                attack: 10,
+                defense: 10,
+                life: 100
+            });
+        });
     }
 }
 
@@ -173,11 +208,18 @@ Game.prototype.canBuy = function(player, type) {
 }
 /**
  * Checks if an object can be placed at the given position.
+ * @param {position} position Position of the object 
  */
 Game.prototype.canBuild = function(position) {
     const index = position.x * config.params.width + position.y;
     if(this.gameObjects[index].type === 'area') return { value: true };
     return { value: false, message: `Can't build at { x: ${position.x}, y: ${position.y} }` };
+}
+
+Game.prototype.canMove = function(position) {
+    const index = position.x * config.params.width + position.y;
+    if(this.gameObjects[index].type === 'area') return { value: true };
+    return { value: false, message: `Can't move to { x: ${position.x}, y: ${position.y} }` };
 }
 
 /**
@@ -194,13 +236,24 @@ Game.prototype.getGameObject = function(player, type, position) {
         type: type
     };
     switch(type) {
+        case 'tower':
+            break;
+        case 'mine':
+        case 'sawmill':
+        case 'quarry':
+        case 'farm':
+            gameObject['workers'] = 1;
+            gameObject['capacity'] = config.capacities[`${type}`];
+            player.addNewWorker(type);
+            break;
         case 'base':
             gameObject['capacity'] = 0;
             break;
-        case 'farm':
+        case 'squad':
             gameObject['workers'] = 1;
-            player.addNewWorker('farm');
             gameObject['capacity'] = config.capacities[`${type}`];
+            player.addNewWorker(type);
+            break;
         default:
             break;
     }

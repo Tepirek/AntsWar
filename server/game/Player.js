@@ -3,9 +3,9 @@ const costs = config.costs;
 
 class Player {
     /**
-     * 
      * @param {id} id 
      * @param {username} username 
+     * @param {socket} socket 
      */
     constructor(socket, id, username) {
         /**
@@ -39,6 +39,10 @@ class Player {
     }
 }
 
+/**
+ * Initializes the player.  
+ * @param {color} color Color of the player.
+ */
 Player.prototype.init = function(color) {
     this.color = color;
     this.initCoords = config.player.baseLocations[this.color];
@@ -61,9 +65,12 @@ Player.prototype.updateResources = function() {
     this.socket.emit('player__setResources', {
        resources: this.resources 
     });
+}
+
+Player.prototype.updateWorkers = function() {
     this.socket.emit('player__setWorkers', {
-        workers: this.workers
-    });
+        workers: this.workers 
+     });
 }
 
 /**
@@ -79,12 +86,24 @@ Player.prototype.buy = function(type) {
 
 Player.prototype.addNewWorker = function(type) {
     switch(type.toLowerCase()) {
+        case 'mine':
+            type = 'gold';
+            break;
+        case 'sawmill':
+            type = 'wood';
+            break;
+        case 'quarry':
+            type = 'stone';
+            break;
         case 'farm': 
             type = 'food';
             break;
     }
+    this.socket.emit('player__setWorkers', {
+        workers: this.workers
+    });
     this.workers[`${type}`] += 1;
-} 
+}
 
 Player.prototype.addGameObject = function(gameObject) {
     this.gameObjects.push(gameObject);

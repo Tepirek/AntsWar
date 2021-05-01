@@ -8,6 +8,7 @@ class Area extends GameObject {
         this.gameObject.onmouseenter = (e) => this.mouseenter();
         this.gameObject.onmouseleave = (e) => this.mouseleave();
         this.gameObject.onclick = (e) => this.click();
+        this.gameObject.style.opacity = 0.5;
     };
 };
 
