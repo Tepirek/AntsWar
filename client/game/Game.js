@@ -32,6 +32,7 @@ Game.prototype.initGUI = function() {
     document.querySelector('.container').removeChild(antBg);
     document.querySelector('.container').removeChild(footer);
     document.querySelector('.container').removeChild(lobby);
+    document.querySelector('.resources').style.visibility = "visible";
     document.querySelector('.gameOptions').style.visibility = "visible";
     this.gameBoard.style.width = `${this.config.width * this.config.areaSize}px`;
     this.gameBoard.style.height = `${this.config.height * this.config.areaSize}px`;

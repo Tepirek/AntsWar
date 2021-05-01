@@ -30,7 +30,7 @@ body {
 
 .footer {
     color:#333333;
-    font-size: 2rem;
+    font-size: 3rem;
     font-weight: bold;
     padding: 10px;
     letter-spacing: 1px;
@@ -103,6 +103,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
+    visibility: hidden;
 }
 
 .resources ul {
@@ -115,6 +116,20 @@ body {
 
 .resources ul > li {
     margin: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 160px;
+}
+
+.resources ul > li > img {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.resources ul > li > span {
+    flex: 4 auto;
+    text-align: center;
 }
 
 .chat {

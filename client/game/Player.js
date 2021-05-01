@@ -27,35 +27,10 @@ Player.prototype.init = function(response) {
 };
 
 Player.prototype.printResources = function() {
-    const resources = document.querySelector('.resources');
-    resources.innerHTML = `
-        <ul>
-            <li>
-                Gold
-            <span id="gold">
-                ${this.resources.gold} (+${this.workers.gold})
-            </span>
-            </li>
-            <li>
-                Wood
-            <span id="wood">
-                ${this.resources.wood} (+${this.workers.wood})
-            </span>
-            </li>
-            <li>
-                Stone
-            <span id="stone">
-                ${this.resources.stone} (+${this.workers.stone})
-            </span>
-            </li>
-            <li>
-                Food
-            <span id="food">
-                ${this.resources.food} (+${this.workers.food})
-            </span
-            </li>
-        </ul>
-    `;
+    document.querySelector('#gold').innerHTML = `${this.resources.gold} (+${this.workers.gold})`;
+    document.querySelector('#wood').innerHTML = `${this.resources.wood} (+${this.workers.wood})`;
+    document.querySelector('#stone').innerHTML = `${this.resources.stone} (+${this.workers.stone})`;
+    document.querySelector('#food').innerHTML = `${this.resources.food} (+${this.workers.food})`;
 };
 
 Player.prototype.createBuilding = function(name) {
