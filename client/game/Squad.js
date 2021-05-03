@@ -3,19 +3,18 @@ class Squad extends Minion {
         super(config.id, config.owner, config.x, config.y, config.size, 'Squad', config.color, config.game, 50, config.costs);
         this.workers = 0;
         this.capacity = 10;
-        this.gameObject.onclick = (res) => {
+        this.gameObject.onclick = () => {
             // reset wyboru budynku ze sklepu
+            this.showOptions();
             localStorage.setItem('action', JSON.stringify({ type: 'move', target: 'squad', object: this }));
-            this.showOptions(res);
         };
     };
 };
 
 /**
  * Shows squad options.
- * @param {}{res} res no nie wiem co to jest.
  */
-Squad.prototype.showOptions = function(res) {
+Squad.prototype.showOptions = function() {
     const options = document.querySelector('.objectOptions');
     options.innerHTML = `
             ${this.name}

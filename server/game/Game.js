@@ -3,6 +3,7 @@ const { PathFinder } = require("../PathFinder");
 const getDate = require("../functions").getDate;
 const config = require("../config").config;
 const costs = config.costs;
+const stats = config.stats;
 
 class Game {
     constructor(io) {
@@ -130,7 +131,8 @@ Game.prototype.__addNewBuilding = function(request) {
                 type: request.type,
                 color: owner.color,
                 position: request.position,
-                workers: gameObject.workers
+                workers: gameObject.workers,
+                stats: gameObject.stats
             });
         });
     }
@@ -306,32 +308,27 @@ Game.prototype.canMove = function(position) {
  * @param {String} type Type of the object being purchased.
  * @param {position} position Position of the object.
  */
-Game.prototype.getGameObject = function(player, type, position) {
+Game.prototype.getGameObject =  function(player, type, position) {
     const index = position.x * config.params.width + position.y;
     const gameObject = {
         id: uniqueID(),
         owner: player.id,
-        type: type
+        type: type,
+        workers: 1,
+        stats: stats[`${type}`]
     };
     switch(type) {
         case 'tower':
-            break;
         case 'mine':
         case 'sawmill':
         case 'quarry':
         case 'farm':
-            gameObject['workers'] = 1;
-            gameObject['capacity'] = config.capacities[`${type}`];
             player.addNewWorker(type);
             break;
         case 'base':
-            gameObject['workers'] = 1;
-            gameObject['capacity'] = 5;
             player.addForceLimit(5);
             break;
         case 'squad':
-            gameObject['workers'] = 1;
-            gameObject['capacity'] = config.capacities[`${type}`];
             player.addNewSoldier();
             break;
         default:

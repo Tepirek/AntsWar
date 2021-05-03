@@ -107,7 +107,8 @@ const config = {
         },
         base: {
             capacity: 10,
-            life: 50
+            life: 50,
+            forceLimit: 5
         },
         squad: {
             capacity: 10,

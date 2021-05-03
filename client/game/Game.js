@@ -134,7 +134,7 @@ Game.prototype.__addNewSoldier = function(response) {
         if(this.map[i].id === response.id) {
             this.map[i].workers = response.workers;
             console.log(this.map[i]);
-            this.map[i].gameObject.click();
+            this.map[i].showOptions();
             this.player.printResources();
             break;
         }
