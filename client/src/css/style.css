@@ -30,7 +30,7 @@ body {
 
 .footer {
     color:#333333;
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: bold;
     padding: 10px;
     letter-spacing: 1px;
@@ -89,6 +89,7 @@ body {
 
 .objectOptions {
     flex: 1 auto;
+    width: 300px;
 }
 
 .logs {
@@ -236,4 +237,27 @@ button:hover {
 
 .errorMsg {
     color:#ff0000;
+}
+
+.buildingsTip {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border: 1px solid #022919;
+    background-color: #1be393;
+    border-radius: 20px;
+    margin: 10px;
+    padding: 5px;
+    z-index: 1000;
+    position: absolute;
+}
+
+.buildingsTipResource {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    color: #000000;
+    text-align: center;
+    font-weight: bold;
+    z-index: 2000;
 }

@@ -10,7 +10,6 @@
 
     const sock = io();
     sock.on('connect', () => {
-
         const lobby = new Lobby(sock);
         const chat = new Chat(sock);
         const player = new Player(sock);

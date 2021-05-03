@@ -48,10 +48,10 @@ const config = {
             food: 20
         },
         base: {
-            gold: 100,
-            wood: 100,
-            stone: 100,
-            food: 100
+            gold: 1000,
+            wood: 1000,
+            stone: 1000,
+            food: 1000
         },
         workers: {
             gold: 10,
@@ -60,19 +60,59 @@ const config = {
             food: 10
         },
         squad: {
-            gold: 20,
-            wood: 20,
-            stone: 20,
-            food: 20
+            gold: 200,
+            wood: 200,
+            stone: 200,
+            food: 200
+        },
+        forceLimit: {
+            gold: 2000,
+            wood: 2000,
+            stone: 2000,
+            food: 2000
         }
     },
     capacities: {
+         /**
+         * Array containing initial capacities of the every building. 
+         */
         tower: 10,
         mine: 10,
         sawmill: 10,
         quarry: 10,
         farm: 10,
-        base: 10
+        base: 10,
+        squad: 10
+    },
+    stats: {
+        tower: {
+            capacity: 10,
+            life: 50
+        },
+        mine: {
+            capacity: 10,
+            life: 50
+        },
+        sawmill: {
+            capacity: 10,
+            life: 50
+        },
+        quarry: {
+            capacity: 10,
+            life: 50
+        },
+        farm: {
+            capacity: 10,
+            life: 50
+        },
+        base: {
+            capacity: 10,
+            life: 50
+        },
+        squad: {
+            capacity: 10,
+            life: 50
+        }
     },
     lobby: {
         capacity: 1,
@@ -89,10 +129,10 @@ const config = {
             { x: 1, y: 62 }
          ],
          resources: {
-             gold: 100,
-             wood: 100,
-             stone: 100,
-             food: 100
+             gold: 10000,
+             wood: 10000,
+             stone: 10000,
+             food: 10000
          },
          workers: {
             gold: 100,

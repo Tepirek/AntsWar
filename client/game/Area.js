@@ -1,4 +1,14 @@
 class Area extends GameObject {
+    /**
+     * @param {id} id
+     * @param {owner} owner 
+     * @param {posX} posX
+     * @param {posY} posY
+     * @param {titleSize} titleSize
+     * @param {name} name 
+     * @param {color} color
+     * @param {game} game 
+     */
     constructor(id, owner, posX, posY, tileSize, name, color, game) {
         super(id, owner, posX, posY, tileSize, name, color, game);
         this.free = true;
@@ -8,7 +18,7 @@ class Area extends GameObject {
         this.gameObject.onmouseenter = (e) => this.mouseenter();
         this.gameObject.onmouseleave = (e) => this.mouseleave();
         this.gameObject.onclick = (e) => this.click();
-        this.gameObject.style.opacity = 0.5;
+        this.gameObject.style.opacity = 0.8;
     };
 };
 
@@ -82,6 +92,7 @@ Area.prototype.mouseleave = function() {
  * Supports adding objects to the map
  */
 Area.prototype.click = function() {
+    console.log(this);
     if(this.type = 'grass') {
         if(this.free) {
             let action = JSON.parse(localStorage.getItem('action'));
@@ -93,7 +104,10 @@ Area.prototype.click = function() {
                     this.game.addNewBuilding(this.position, action.target);
                 }
             }
-            action = { type: '', target: '' };
+            else if(action.type == 'move') {
+                this.game.moveSquad(action.object, this.position);
+            }
+            action = { type: '', target: '', object: null };
             localStorage.setItem('action', JSON.stringify(action));
         }
     }

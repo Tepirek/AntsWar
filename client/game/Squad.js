@@ -5,12 +5,16 @@ class Squad extends Minion {
         this.capacity = 10;
         this.gameObject.onclick = (res) => {
             // reset wyboru budynku ze sklepu
-            localStorage.setItem('action', JSON.stringify({ type: '', target: '' }));
+            localStorage.setItem('action', JSON.stringify({ type: 'move', target: 'squad', object: this }));
             this.showOptions(res);
         };
     };
 };
 
+/**
+ * Shows squad options.
+ * @param {}{res} res no nie wiem co to jest.
+ */
 Squad.prototype.showOptions = function(res) {
     const options = document.querySelector('.objectOptions');
     options.innerHTML = `
@@ -28,6 +32,6 @@ Squad.prototype.showOptions = function(res) {
         </table>
     `;
     document.querySelector('#addSoldier').onclick = () => {
-        this.game.addNewWorker(this);
+        this.game.addNewSoldier(this);
     }
 }

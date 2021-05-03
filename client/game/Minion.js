@@ -36,6 +36,12 @@ class Minion extends Building {
     }
 }
 
-Minion.prototype.move = function() {
-
+/**
+ * Movement of minions
+ */
+Minion.prototype.move = function(position) {
+    this.position.x = position.x;
+    this.position.y = position.y;
+    this.gameObject.style.top = `${this.position.x * this.size}px`;
+    this.gameObject.style.left = `${this.position.y * this.size}px`;
 }

@@ -23,6 +23,12 @@ Lobby.prototype.init = function() {
     this.capacity = config.lobby.capacity;
 }
 
+/**
+ * Joins the lobby.
+ * @param {game} game A game to join.
+ * @param {sock} sock Communication socket.
+ * @param {request} request Request from the client.
+ */
 Lobby.prototype.join = function(game, sock, request) {
     if(this.lobby.filter(player => player.username == request.username).length) {
         sock.emit('lobby__error', {
@@ -58,6 +64,9 @@ Lobby.prototype.join = function(game, sock, request) {
     }
 }
 
+/**
+ * Checks if the number of players is sufficient.
+ */
 Lobby.prototype.isFull = function() {
     return Object.keys(this.lobby).length == config.lobby.capacity;
 }

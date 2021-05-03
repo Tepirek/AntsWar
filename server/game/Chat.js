@@ -10,6 +10,11 @@ class Chat {
     }
 }
 
+/**
+ * Initializes the chat.
+ * @param {game} game Game.
+ * @param sock sock Sock.
+ */
 Chat.prototype.init = function(game, sock) {
     sock.emit('chat__message', {
         date: getDate(),
@@ -20,6 +25,12 @@ Chat.prototype.init = function(game, sock) {
     })
 }
 
+/**
+ * Sends a message.
+ * @param {game} game Game.
+ * @param {sock} sock Sock.
+ * @param {request} request Request.
+ */
 Chat.prototype.sendMessage = function(game, sock, request) {
     const message = { 
         date: getDate(), 

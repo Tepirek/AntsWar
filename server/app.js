@@ -6,6 +6,7 @@ const { Game } = require('./game/Game');
 const { Lobby } = require('./game/Lobby');
 const { Chat } = require('./game/Chat');
 
+
 const app = express();
 
 app.use(express.static(`${__dirname}/../client`));
@@ -40,8 +41,14 @@ io.on('connection', (sock) => {
     sock.on('game_addNewBuilding', (request) => game.__addNewBuilding(request));
     sock.on('game_addNewWorker', (request) => game.__addNewWorker(request));
     sock.on('game_addNewSquad', request => game.__addNewSquad(request));
+    sock.on('game_addNewSoldier', request => game.__addNewSoldier(request));
+    sock.on('game_addForceLimit', request => game.__addForceLimit(request));
+    sock.on('game_moveSquad', request => game.__moveSquad(request))
 });
 
+/**
+ * Updates current connections.
+ */
 const updateCurrentConnections = async () => {
     const clients = await io.fetchSockets();
     const players = [];

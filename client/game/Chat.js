@@ -71,6 +71,7 @@ Chat.prototype.onChatSubmitted = function (e) {
 
 /**
  * Receives a chat message from the server.
+ * @param {msg} msg Message to show. 
  */
 Chat.prototype.log = function(msg) {
     const li = document.createElement('li');

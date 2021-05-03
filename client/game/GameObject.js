@@ -11,8 +11,7 @@ class GameObject {
         GameObject.prototype.color = color;
         GameObject.prototype.game = game;
         this.gameObject = document.createElement('div');
-        this.setStyle();   
-        this.draw();
+        this.setStyle();
     };
 };
 
@@ -37,3 +36,7 @@ GameObject.prototype.setStyle = function() {
 GameObject.prototype.draw = function() {
     document.querySelector('.gameBoard').appendChild(this.gameObject);
 };
+
+GameObject.prototype.remove = function() {
+    this.gameObject.parentElement.removeChild(this.gameObject);
+}

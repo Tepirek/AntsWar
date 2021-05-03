@@ -33,6 +33,9 @@ Lobby.prototype.init = function() {
     });
 };
 
+/**
+ * 
+ */
 Lobby.prototype.lobbyConnected = function(response) {
     const lobbyWrapper = document.querySelector('.lobby-wrapper');
     lobbyWrapper.innerHTML = `
@@ -40,6 +43,9 @@ Lobby.prototype.lobbyConnected = function(response) {
     `;
 };
 
+/**
+ * 
+ */
 Lobby.prototype.lobbyEnter = function(e) {
     e.preventDefault();
     const input = document.querySelector('#lobby');
@@ -50,6 +56,9 @@ Lobby.prototype.lobbyEnter = function(e) {
     input.value = '';
 };
 
+/**
+ * Player lobby view
+ */
 Lobby.prototype.lobbyPlayers = function(response) {
     const parent = document.querySelector('.lobby_players');
     parent.innerHTML = '';
@@ -63,6 +72,9 @@ Lobby.prototype.lobbyPlayers = function(response) {
     document.querySelector('#lobbyCapacity').innerHTML = `${i}/${response.capacity}`;
 }
 
+/**
+ *Start game view.
+ */
 Lobby.prototype.lobbyPrepare = function(response) {
     const parent = document.querySelector('.lobby_players');
     const timer = document.createElement('div');
@@ -74,6 +86,9 @@ Lobby.prototype.lobbyPrepare = function(response) {
     }, 1000);
 }
 
+/**
+ *Error messages
+ */
 Lobby.prototype.__error = function(response) {
     const error = document.querySelector('.error'); 
     error.style.visibility = 'visible';

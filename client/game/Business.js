@@ -15,7 +15,11 @@ class Business extends Building {
  * Shows options and start adding an employee, support for sending a request to be added in the game class.
  */
 Business.prototype.showOptions = function() {
-    const options = document.querySelector('.objectOptions');
+    const tip = document.getElementById(`${this.id}`);
+    if(tip) {
+        tip.parentElement.removeChild(tip);
+    }
+    let options = document.querySelector('.objectOptions');
     options.innerHTML = `
             ${this.name}
         <table>
@@ -30,8 +34,39 @@ Business.prototype.showOptions = function() {
             </tr>
         </table>
     `;
-    document.querySelector('#addWorker').onclick = () => {
+    const buildingsTip = document.createElement('div');
+    buildingsTip.id = this.id;
+    buildingsTip.className = 'buildingsTip';
+    const button = document.querySelector('#addWorker');
+    button.onclick = () => {
         this.game.addNewWorker(this);
         this.gameObject.click();
     }
+    button.addEventListener('mouseenter', () => {
+        buildingsTip.innerHTML = `
+            <div class="buildingsTip">
+                <div class="buildingsTipResource">
+                    <img src="src/img/gold.png" alt="gold"> ${this.costs.gold}
+                </div>
+                <div class="buildingsTipResource">
+                    <img src="src/img/wood.png" alt="wood"> ${this.costs.wood}
+                </div>
+                <div class="buildingsTipResource">
+                    <img src="src/img/stone.png" alt="stone"> ${this.costs.stone}
+                </div>
+                <div class="buildingsTipResource">
+                    <img src="src/img/food.png" alt="food"> ${this.costs.food}
+                </div>
+            </div>
+        `;
+        const position = button.getBoundingClientRect();
+        buildingsTip.style.top = `${position.top - 10 - buildingsTip.offsetHeight * 2}px`;
+        buildingsTip.style.left = `${position.left - 10 + (button.offsetWidth - 10) / 2}px`;
+        buildingsTip.style.visibility = "visible";
+    });
+    button.addEventListener('mouseleave', () => {
+        buildingsTip.innerHTML = "";
+        buildingsTip.style.visibility = "hidden";
+    });
+    document.body.appendChild(buildingsTip);
 }
