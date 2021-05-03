@@ -8,9 +8,9 @@ class Sawmill extends Business {
             'Sawmill', 
             config.color, 
             config.game, 
-            50, //life 
+            config.stats.life, //life 
             config.costs, 
-            10); //workers limit 
+            config.stats.capacity); //workers limit 
     };
 };
     

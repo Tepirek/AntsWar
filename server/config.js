@@ -53,17 +53,23 @@ const config = {
             stone: 1000,
             food: 1000
         },
-        workers: {
-            gold: 10,
-            wood: 10,
-            stone: 10,
-            food: 10
-        },
         squad: {
             gold: 200,
             wood: 200,
             stone: 200,
             food: 200
+        },
+        wall: {
+            gold: 200,
+            wood: 200,
+            stone: 200,
+            food: 200
+        },
+        workers: {
+            gold: 10,
+            wood: 10,
+            stone: 10,
+            food: 10
         },
         forceLimit: {
             gold: 2000,
@@ -87,37 +93,37 @@ const config = {
     stats: {
         tower: {
             capacity: 10,
-            life: 50
+            life: 500
         },
         mine: {
             capacity: 10,
-            life: 50
+            life: 200
         },
         sawmill: {
             capacity: 10,
-            life: 50
+            life: 200
         },
         quarry: {
             capacity: 10,
-            life: 50
+            life: 200
         },
         farm: {
             capacity: 10,
-            life: 50
+            life: 200
         },
         base: {
             capacity: 10,
-            life: 50,
-            forceLimit: 5
+            life: 1000,
+            forceLimit: 100
         },
         squad: {
             capacity: 10,
-            life: 50
+            life: 10
         }
     },
     lobby: {
         capacity: 1,
-        delay: 0
+        delay: 500
     },
     player: {
         /**

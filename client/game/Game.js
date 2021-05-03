@@ -192,15 +192,16 @@ Game.prototype.getBuilding = function(response) {
         size: this.config.areaSize, 
         game: this,
         color: response.color,
-        costs: this.costs[`${response.type}`]
+        costs: this.costs[`${response.type}`],
+        stats: response.stats
     };
     let building;
     switch(response.type) {
         case 'tower':
-            building = new Tower(config);
+            building = new test(config);
             break;
         case 'mine': 
-            building = new Mine(config);
+            building = new test(config);
             building.workers = response.workers;
             break;
         case 'sawmill': 
@@ -240,12 +241,9 @@ Game.prototype.moveSquad = function(object, position) {
 Game.prototype.__moveSquad = function(response) {
     const previous = response.previous;
     const current = response.current;
-    const gameObject = Object.create(Object.getPrototypeOf(this.map[previous]), Object.getOwnPropertyDescriptors(this.map[previous]));
-    this.map[current].setObject(gameObject);
-    delete this.map[current];
-    this.map[current] = gameObject;
-    gameObject.move(response.currentPosition);
+    this.map[current] = this.map[previous];
     this.map[previous] = new Area(-1, 'default', response.previousPosition.x, response.previousPosition.y, this.config.areaSize, 'grass', 0, this);
+    this.map[current].move(response.currentPosition);
 }
 
 /**

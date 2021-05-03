@@ -2,15 +2,15 @@ class Area extends GameObject {
     /**
      * @param {id} id
      * @param {owner} owner 
-     * @param {posX} posX
-     * @param {posY} posY
+     * @param {x} x
+     * @param {y} y
      * @param {titleSize} titleSize
      * @param {name} name 
      * @param {color} color
      * @param {game} game 
      */
-    constructor(id, owner, posX, posY, tileSize, name, color, game) {
-        super(id, owner, posX, posY, tileSize, name, color, game);
+    constructor(id, owner, x, y, tileSize, name, color, game) {
+        super(id, owner, x, y, tileSize, name, color, game);
         this.free = true;
         this.object = undefined;
         this.type = 'grass';
@@ -76,6 +76,9 @@ Area.prototype.mouseenter = function() {
     if(action.type == 'drag' && this.free) {
         this.gameObject.style.border = '3px solid #ff1f1f';
     }
+    else if(action.type == 'move') {
+        this.gameObject.innerHTML = `X`;
+    }
 };
 
 /**
@@ -83,7 +86,10 @@ Area.prototype.mouseenter = function() {
  */
 Area.prototype.mouseleave = function() {
     let action = JSON.parse(localStorage.getItem('action'));
-    if(action.type != 'select' && this.free) {
+    if(action.type == 'move') {
+        this.gameObject.innerHTML = "";
+    }
+    else if(action.type != 'select' && this.free) {
         this.gameObject.style.border = '';
     }
 };
@@ -105,6 +111,7 @@ Area.prototype.click = function() {
                 }
             }
             else if(action.type == 'move') {
+                this.gameObject.innerHTML = "";
                 this.game.moveSquad(action.object, this.position);
             }
             action = { type: '', target: '', object: null };

@@ -35,6 +35,8 @@ Player.prototype.init = function(response) {
     this.createBuilding('Quarry');
     this.createBuilding('Farm');
     this.createBuilding('Base');
+    this.createBuilding('Squad');
+    this.createBuilding('Wall');
 };
 
 /**

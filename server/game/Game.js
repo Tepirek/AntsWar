@@ -157,7 +157,7 @@ Game.prototype.__addNewWorker = function(request) {
         for(let i = 0; i < this.gameObjects.length; i++) {
             gameObject = this.gameObjects[i];
             const canBuy = this.canBuy(player, 'workers');
-            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.capacity && canBuy.value === true) {
+            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
                 player.buy('workers');
                 gameObject.workers += 1;
                 player.addNewWorker(gameObject.type);
@@ -212,7 +212,7 @@ Game.prototype.__addNewSoldier = function(request) {
         for(let i = 0; i < this.gameObjects.length; i++) {
             gameObject = this.gameObjects[i];
             const canBuy = this.canBuy(player, 'squad');
-            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.capacity && canBuy.value === true && player.force + 1 <= player.forceLimit) {
+            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true && player.force + 1 <= player.forceLimit) {
                 player.buy('squad');
                 gameObject.workers += 1;
                 player.addNewSoldier();
@@ -254,7 +254,7 @@ Game.prototype.__addForceLimit = function(request) {
                 });
                 return;
             }
-            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.capacity && canBuy.value === true) {
+            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
                 player.buy('forceLimit');
                 gameObject.workers += 1;
                 player.addNewWorker(gameObject.type);
@@ -319,14 +319,22 @@ Game.prototype.getGameObject =  function(player, type, position) {
     };
     switch(type) {
         case 'tower':
+            player.addNewWorker(type);
+            break;
         case 'mine':
+            player.addNewWorker(type);
+            break;
         case 'sawmill':
+            player.addNewWorker(type);
+            break;
         case 'quarry':
+            player.addNewWorker(type);
+            break;
         case 'farm':
             player.addNewWorker(type);
             break;
         case 'base':
-            player.addForceLimit(5);
+            player.addForceLimit(stats.base.forceLimit);
             break;
         case 'squad':
             player.addNewSoldier();
@@ -354,19 +362,23 @@ Game.prototype.__moveSquad = function(request) {
             return;
         }
         let delay = 0;
-        for(var i = 1; i < path.length; i++) {
+        let timers = [];
+        for(let i = 1; i < path.length; i++) {
             let previous = path[i - 1].x * config.params.width + path[i - 1].y;
             let current = path[i].x * config.params.width + path[i].y;
             const previousPosition = path[i - 1];
             const currentPosition = path[i];
-            const gameObject = Object.assign({}, this.gameObjects[previous]);
-            this.gameObjects[previous] = {
-                id: uniqueID(),
-                type: 'area',
-                owner: 'default'
-            };
-            this.gameObjects[current] = gameObject;
-            setTimeout(() => {
+            timers[i] = setTimeout(() => {
+                if(this.gameObjects[current].type != 'area') {
+                    timers.forEach(t => clearTimeout(t));
+                    return;
+                }
+                this.gameObjects[current] = this.gameObjects[previous];
+                this.gameObjects[previous] = {
+                    id: uniqueID(),
+                    type: 'area',
+                    owner: 'default'
+                };
                 this.io.emit('game__moveSquad', {
                     id: request.object.id,
                     previous: previous,
@@ -375,7 +387,7 @@ Game.prototype.__moveSquad = function(request) {
                     currentPosition: currentPosition
                 });
             }, delay);
-            delay += 300;
+            delay += 400;
         }
     }
 }

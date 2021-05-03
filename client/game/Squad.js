@@ -21,7 +21,7 @@ Squad.prototype.showOptions = function() {
         <table>
             <tr>
                 <td>Soldiers</td>
-                <td>${this.workers}/${this.capacity}</td>
+                <td id="soldiersCapacity">${this.workers}/${this.capacity}</td>
                 <td><img id="addSoldier" src="../src/img/plus.png" alt="plus" style="cursor:pointer"></td>
             </tr>
             <tr>

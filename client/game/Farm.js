@@ -8,9 +8,9 @@ class Farm extends Business {
             'Farm', 
             config.color, 
             config.game, 
-            50, //life 
+            config.stats.life, 
             config.costs, 
-            10); //workers limit 
+            config.stats.capacity); 
     };
 };
     

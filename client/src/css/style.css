@@ -70,6 +70,10 @@ body {
     justify-content: space-evenly;
 }
 
+.buildings, .objectOptions, .logs {
+    height: 180px;
+}
+
 .chatButton:hover {
     background-color: #1be393;
     transition: 1s;
@@ -80,7 +84,7 @@ body {
     display: inline-flex;
     flex: 1 auto;
     flex-wrap: wrap;
-    max-width: 250px;
+    max-width: 320px;
 }
 
 .buildingPrototype {
@@ -97,7 +101,10 @@ body {
 }
 
 .chatButton {
-    flex: 1 auto;
+    position: absolute;
+    padding: 10px;
+    top: 20px;
+    right: 20px;
 }
 
 .resources {
@@ -230,9 +237,9 @@ button:hover {
     border-radius: 20px;
 }
 #logsList {
-    height: 148px;
     list-style: none;
     overflow-y: scroll;
+    max-height: 160px;
 }
 
 .errorMsg {

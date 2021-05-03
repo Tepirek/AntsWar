@@ -1,14 +1,14 @@
 class GameObject {
-    constructor(id, owner, posX, posY, areaSize, name, color, game) {
+    constructor(id, owner, x, y, areaSize, name, color, game) {
         this.id = id;
         this.owner = owner;
         this.position = {
-            x: posX,
-            y: posY
+            x: x,
+            y: y
         };
         this.size = areaSize;
         this.name = name;
-        GameObject.prototype.color = color;
+        this.color = color;
         GameObject.prototype.game = game;
         this.gameObject = document.createElement('div');
         this.setStyle();
@@ -21,6 +21,10 @@ class GameObject {
 GameObject.prototype.setStyle = function() {
     this.gameObject.style = `
         position:absolute;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        color: #ffffff;
         width:${this.size}px;
         height:${this.size}px;
         top:${this.position.x * this.size}px;
