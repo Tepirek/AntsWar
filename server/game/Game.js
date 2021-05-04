@@ -124,16 +124,13 @@ Game.prototype.__addNewBuilding = function(request) {
         owner.buy(request.type);
         this.gameObjects[index] = gameObject;
         owner.addGameObject(gameObject);
+        const data = Object.assign({}, gameObject);
+        data['position'] = request.position,
+        data['type'] = request.type;
+        data['index'] = index;
+        data['color'] = owner.color;
         Object.values(this.players).forEach(player => {
-            this.io.to(player.id).emit('game__addNewBuilding', {
-                id: gameObject.id,
-                owner: player.id,
-                type: request.type,
-                color: owner.color,
-                position: request.position,
-                workers: gameObject.workers,
-                stats: gameObject.stats
-            });
+            this.io.to(player.id).emit('game__addNewBuilding', data);
         });
     }
     else {
@@ -184,19 +181,13 @@ Game.prototype.__addNewSquad = function(request) {
         owner.buy('squad');
         this.gameObjects[index] = gameObject;
         owner.addGameObject(gameObject);
+        const data = Object.assign({}, gameObject);
+        data['position'] = request.position,
+        data['type'] = 'squad';
+        data['index'] = index;
+        data['color'] = owner.color;
         Object.values(this.players).forEach(player => {
-            this.io.to(player.id).emit('game__addNewSquad', {
-                id: gameObject.id,
-                owner: player.id,
-                type: request.type,
-                color: owner.color,
-                position: request.position,
-                type: 'squad',
-                workers: gameObject.workers,
-                attack: 10,
-                defense: 10,
-                life: 100
-            });
+            this.io.to(player.id).emit('game__addNewSquad', data);
         });
     }
 }
@@ -315,6 +306,7 @@ Game.prototype.getGameObject =  function(player, type, position) {
         owner: player.id,
         type: type,
         workers: 1,
+        costs: costs[`${type}`],
         stats: stats[`${type}`]
     };
     switch(type) {
@@ -333,6 +325,9 @@ Game.prototype.getGameObject =  function(player, type, position) {
         case 'farm':
             player.addNewWorker(type);
             break;
+        case 'wall':
+            player.addNewWorker(type);
+            break;    
         case 'base':
             player.addForceLimit(stats.base.forceLimit);
             break;
@@ -387,7 +382,7 @@ Game.prototype.__moveSquad = function(request) {
                     currentPosition: currentPosition
                 });
             }, delay);
-            delay += 400;
+            delay += 300;
         }
     }
 }

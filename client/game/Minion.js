@@ -1,8 +1,8 @@
 class Minion extends Building {
-    constructor(id, owner, posX, posY, tileSize, name, color, game, life, costs, capacity) {
-        super(id, owner, posX, posY, tileSize, name, color, game, life, costs);
-        this.workers = 0;
-        this.capacity = capacity;
+    constructor(data, game) {
+        super(data, game);
+        this.workers = data.workers;
+        this.capacity = data.stats.capacity;
         this.gameObject.onclick = (res) => {
             // reset wyboru budynku ze sklepu
             localStorage.setItem('action', JSON.stringify({ type: '', target: '' }));
@@ -17,12 +17,14 @@ class Minion extends Building {
  Minion.prototype.showOptions = function() {
     const options = document.querySelector('.objectOptions');
     options.innerHTML = `
-            ${this.name}
+        <div style="text-transform:capitalize">
+            ${this.type}
+        </div>    
         <table>
             <tr>
                 <td>Workers</td>
                 <td>${this.workers}/${this.capacity}</td>
-                <td><img id="addWorker" src="../src/img/plus.png" alt="plus" style="cursor:pointer"></td>
+                <td><img id="addWorker" src="../src/img/plus00.png" alt="plus" style="cursor:pointer"></td>
             </tr>
             <tr>
                 <td>Life</td>

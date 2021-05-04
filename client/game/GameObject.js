@@ -1,15 +1,12 @@
 class GameObject {
-    constructor(id, owner, x, y, areaSize, name, color, game) {
-        this.id = id;
-        this.owner = owner;
-        this.position = {
-            x: x,
-            y: y
-        };
-        this.size = areaSize;
-        this.name = name;
-        this.color = color;
+    constructor(data, game) {
+        this.id = data.id;
+        this.owner = data.owner;
+        this.position = data.position;
+        this.type = data.type;
+        this.color = data.color;
         GameObject.prototype.game = game;
+        this.size = this.game.config.areaSize;
         this.gameObject = document.createElement('div');
         this.setStyle();
     };
@@ -29,7 +26,7 @@ GameObject.prototype.setStyle = function() {
         height:${this.size}px;
         top:${this.position.x * this.size}px;
         left:${this.position.y * this.size}px;
-        background-image:url('../src/img/${this.name}0${this.color}.png');
+        background-image:url('../src/img/${this.type}0${this.color}.png');
         cursor:pointer;
     `;
 }
@@ -43,4 +40,13 @@ GameObject.prototype.draw = function() {
 
 GameObject.prototype.remove = function() {
     this.gameObject.parentElement.removeChild(this.gameObject);
+}
+
+GameObject.prototype.fog = function(value) {
+    this.foggy = value;
+    if(value) {
+        this.gameObject.style.opacity = 0.1;
+    } else {
+        this.gameObject.style.opacity = 0.8;
+    }
 }

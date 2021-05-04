@@ -119,6 +119,10 @@ const config = {
         squad: {
             capacity: 10,
             life: 10
+        },
+        wall: {
+            capacity: 10,
+            life: 10
         }
     },
     lobby: {

@@ -52,9 +52,17 @@ Game.prototype.init = function(response) {
     for(let i = 0; i < this.config.height; i++) {
         for(let j = 0; j < this.config.width; j++) {
             const index = i * this.config.width + j;
-            let area = new Area(-1, 'default', i, j, this.config.areaSize, 'grass', 0, this);
+            const data = {
+                id: -1,
+                owner: 'default',
+                position: { x: i, y: j },
+                type: 'grass',
+                color: 0
+            }
+            let area = new Area(data, this);
             this.map[index] = area;
             this.map[index].draw();
+            this.map[index].fog(true);
         }
     }
 };
@@ -77,13 +85,15 @@ Game.prototype.addNewBuilding = function(position, type) {
  * @param {response} response Server response in the form: 
  */
 Game.prototype.__addNewBuilding = function(response) {
-    const index = response.position.x * this.config.width + response.position.y;
+    const index = response.index;
     const building = this.getBuilding(response);
-    // this.map[index].setFree(false);
+    console.log(building);
     this.map[index].setObject(building);
+    this.map[index].fog(false);
     delete this.map[index];
     this.map[index] = building;
     this.map[index].draw();
+    this.setFog(this.map[index], 2);
 };
 
 /**
@@ -106,7 +116,7 @@ Game.prototype.__addNewWorker = function(response) {
         if(this.map[i].id === response.id) {
             this.map[i].workers = response.workers;
             this.map[i].gameObject.click();
-            this.player.addNewWorker(this.map[i].name);
+            this.player.addNewWorker(this.map[i].type);
             this.player.printResources();
             break;
         }
@@ -133,7 +143,6 @@ Game.prototype.__addNewSoldier = function(response) {
     for(let i = 0; i < this.map.length; i++) {
         if(this.map[i].id === response.id) {
             this.map[i].workers = response.workers;
-            console.log(this.map[i]);
             this.map[i].showOptions();
             this.player.printResources();
             break;
@@ -168,13 +177,15 @@ Game.prototype.addNewSquad = function(position) {
  * @param {response} response Server response in the form: 
  */
 Game.prototype.__addNewSquad = function(response) {
-    const index = response.position.x * this.config.width + response.position.y;
+    console.log(response);
+    const index = response.index;
     const building = this.getBuilding(response);
-    // this.map[index].setFree(false);
     this.map[index].setObject(building);
+    this.map[index].fog(false);
     delete this.map[index];
     this.map[index] = building;
     this.map[index].draw();
+    this.setFog(this.map[index], 1);
 }
 
 /**
@@ -183,50 +194,18 @@ Game.prototype.__addNewSquad = function(response) {
  * @param {type} type Type of the building.
  * @param {color} color Color of the building.
  */
-Game.prototype.getBuilding = function(response) {
-    let config = {
-        id: response.id,
-        owner: response.owner,
-        x: response.position.x, 
-        y: response.position.y, 
-        size: this.config.areaSize, 
-        game: this,
-        color: response.color,
-        costs: this.costs[`${response.type}`],
-        stats: response.stats
+Game.prototype.getBuilding = function(data) {
+    const constructors = {
+        tower: Tower,
+        mine: Mine,
+        sawmill: Sawmill,
+        quarry: Quarry,
+        farm: Farm,
+        wall: Wall,
+        base: Base,
+        squad: Squad
     };
-    let building;
-    switch(response.type) {
-        case 'tower':
-            building = new test(config);
-            break;
-        case 'mine': 
-            building = new test(config);
-            building.workers = response.workers;
-            break;
-        case 'sawmill': 
-            building = new Sawmill(config);
-            building.workers = response.workers;
-            break;
-        case 'quarry': 
-            building = new Quarry(config);
-            building.workers = response.workers;
-            break;
-        case 'farm': 
-            building = new Farm(config);
-            building.workers = response.workers;
-            break;
-        case 'base':
-            building = new Base(config);
-            building.workers = response.workers;
-            break;
-        case 'squad': 
-            building = new Squad(config);
-            building.workers = response.workers;
-            break;
-        default:
-            break;
-    }
+    const building = new constructors[`${data.type}`](data, this);
     return building;
 };
 
@@ -242,8 +221,17 @@ Game.prototype.__moveSquad = function(response) {
     const previous = response.previous;
     const current = response.current;
     this.map[current] = this.map[previous];
-    this.map[previous] = new Area(-1, 'default', response.previousPosition.x, response.previousPosition.y, this.config.areaSize, 'grass', 0, this);
+    const data = {
+        id: -1,
+        owner: 'default',
+        position: { x: response.previousPosition.x, y: response.previousPosition.y },
+        type: 'grass',
+        color: 0
+    }
+    this.map[previous] = new Area(data, this);
     this.map[current].move(response.currentPosition);
+    this.setFog(this.map[previous], 1, true);
+    this.setFog(this.map[current], 1, false);
 }
 
 /**
@@ -257,4 +245,13 @@ Game.prototype.__error = function(response) {
     li.innerHTML = `<small>${response.date} ${author}</small> - ${response.message}`;
     logs.appendChild(li);
     logs.scrollTop = logs.scrollHeight;
+}
+
+Game.prototype.setFog = function(gameObject, radius, value) {
+    for(let i = gameObject.position.x - radius; i < gameObject.position.x + radius + 1; i++) {
+        for(let j = gameObject.position.y - radius; j < gameObject.position.y + radius + 1; j++) {
+            if(i < 0 || j < 0) continue;
+            this.map[i * this.config.width + j].fog(value);
+        }
+    }
 }

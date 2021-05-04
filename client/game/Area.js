@@ -9,8 +9,8 @@ class Area extends GameObject {
      * @param {color} color
      * @param {game} game 
      */
-    constructor(id, owner, x, y, tileSize, name, color, game) {
-        super(id, owner, x, y, tileSize, name, color, game);
+    constructor(data, game) {
+        super(data, game);
         this.free = true;
         this.object = undefined;
         this.type = 'grass';
@@ -18,7 +18,6 @@ class Area extends GameObject {
         this.gameObject.onmouseenter = (e) => this.mouseenter();
         this.gameObject.onmouseleave = (e) => this.mouseleave();
         this.gameObject.onclick = (e) => this.click();
-        this.gameObject.style.opacity = 0.8;
     };
 };
 

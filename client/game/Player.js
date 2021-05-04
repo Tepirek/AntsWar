@@ -105,7 +105,7 @@ Player.prototype.createBuilding = function(name) {
  * @param {type} type Type of the building.
  */
 Player.prototype.addNewWorker = function(type) {
-    switch(type.toLowerCase()) {
+    switch(type) {
         case 'mine':
             type = 'gold';
             break;
