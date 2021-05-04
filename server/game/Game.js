@@ -44,7 +44,6 @@ Game.prototype.init = function() {
     Object.values(this.players).forEach(player => {
         this.io.to(player.id).emit('game__init', {
             config: config.params,
-            map: map,
             costs: config.costs
         });
     });
@@ -193,7 +192,7 @@ Game.prototype.__addNewSquad = function(request) {
 }
 
 /**
- * Adds a new worker to a given squad.
+ * Adds a new soldier to a given squad.
  * @param {request} request Request from the client.
  */
 Game.prototype.__addNewSoldier = function(request) {
@@ -219,6 +218,33 @@ Game.prototype.__addNewSoldier = function(request) {
                     author: player.username,
                     type: 'error',
                     message: 'Unable to build this structure!'
+                });
+            }
+        }
+    }   
+}
+
+
+/**
+ * Adds a new defender to a given wall.
+ * @param {request} request Request from the client.
+ */
+ Game.prototype.__addNewDefender = function(request) {
+    const player = this.players[`${request.object.owner}`];
+    if(this.players[`${request.player}`].gameObjects.some(o => o.id === request.object.id)) {
+        let gameObject;
+        for(let i = 0; i < this.gameObjects.length; i++) {
+            gameObject = this.gameObjects[i];
+            const canBuy = this.canBuy(player, 'workers');
+            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
+                player.buy('workers');
+                gameObject.workers += 1;
+                gameObject.life += 10;
+                player.addNewWorker(gameObject.type);
+                this.io.to(request.object.owner).emit('game__addNewDefender', {
+                    id: request.object.id,
+                    workers: gameObject['workers'],
+                    life: gameObject.life
                 });
             }
         }

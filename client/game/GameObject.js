@@ -7,6 +7,7 @@ class GameObject {
         this.color = data.color;
         GameObject.prototype.game = game;
         this.size = this.game.config.areaSize;
+        this.foggy = 1;
         this.gameObject = document.createElement('div');
         this.setStyle();
     };
@@ -42,11 +43,15 @@ GameObject.prototype.remove = function() {
     this.gameObject.parentElement.removeChild(this.gameObject);
 }
 
-GameObject.prototype.fog = function(value) {
-    this.foggy = value;
-    if(value) {
+GameObject.prototype.checkFog = function() {
+    if(this.foggy > 0) {
         this.gameObject.style.opacity = 0.1;
     } else {
         this.gameObject.style.opacity = 0.8;
     }
 }
+
+GameObject.prototype.addFog = function(value) {
+    this.foggy += value;
+}
+
