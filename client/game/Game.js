@@ -4,7 +4,7 @@ class Game {
          * 3D array containing game objects
          */
         this.gameObjects;
-        this.map = [];
+        this.visibility;
         this.player = player;
         this.gameBoard = document.querySelector('.gameBoard');
         this.gameOptions = document.querySelector('.gameOptions');
@@ -20,8 +20,8 @@ class Game {
             this.__addNewBuilding(response);
         });
         this.socket.on('game__addNewWorker', response => this.__addNewWorker(response));
-        this.socket.on('game__addNewSquad', response => this.__addNewSquad(response));
         this.socket.on('game__addNewSoldier', response => this.__addNewSoldier(response));
+        this.socket.on('game__addNewDefender', response => this.__addNewDefender(response));
         this.socket.on('game__moveSquad', response => this.__moveSquad(response));
         this.socket.on('game__error', response => this.__error(response));
     }
@@ -52,44 +52,50 @@ Game.prototype.initGUI = function() {
 Game.prototype.init = function(response) {
     this.config = response.config;
     this.costs = response.costs;
+    // creating 3D array (height x width x 1) of area objects
+    let index = 0;
+    this.gameObjects = Array.apply(null, new Array(this.config.height)).map(
+        () => Array.apply(null, new Array(this.config.width)).map(
+            () => Array.apply(null, new Array(1)).map(
+                () => {
+                    let i = Math.floor(index / this.config.width);
+                    let j = index - (i * this.config.width);
+                    index++;
+                    const data = {
+                        id: -1,
+                        owner: 'default',
+                        position: { x: i, y: j },
+                        type: 'grass',
+                        color: 0
+                    }
+                    const gameObject = new Area(data, this);
+                    gameObject.draw();
+                    return gameObject;
+                }
+            )
+        )
+    );
+    this.initFog();
+};
 
-/*     // creating 3D array (height x width x 1) of empty objects
-    this.gameObjects = Array.apply(null, new Array(this.config.height)).map(() => Array.apply(null, new Array(this.config.width)).map(() => Array.apply(null, new Array(1)).map(() => new Object())));
-    // initializing 3D array with Area objects
-    this.gameObjects.forEach((vi, i) => vi.forEach((vj, j) => vj.forEach((vk, k) => {
+Game.prototype.initFog = function() {
+    let index = 0;
+    this.visibility = Array.apply(null, new Array(this.config.height)).map(() => Array.apply(null, new Array(this.config.width)).map(() => {
+        let i = Math.floor(index / this.config.width);
+        let j = index - (i * this.config.width);
+        index++;
         const data = {
             id: -1,
             owner: 'default',
             position: { x: i, y: j },
-            type: 'grass',
+            type: 'fog',
             color: 0
         }
-        vk[k] = new Area(data, this);
-        vk[k].draw();
-        vk[k].checkFog();
-    }))); */
-
-    // creating 1D array (32 * 64) of null elements
-    this.map = Array.apply(null, new Array(this.config.height * this.config.width)).map(() => null);
-
-    for(let i = 0; i < this.config.height; i++) {
-        for(let j = 0; j < this.config.width; j++) {
-            const index = i * this.config.width + j;
-            const data = {
-                id: -1,
-                owner: 'default',
-                position: { x: i, y: j },
-                type: 'grass',
-                color: 0
-            }
-            let area = new Area(data, this);
-            this.map[index] = area;
-            this.map[index].checkFog();
-            this.map[index].draw();
-            
-        }
-    }
-};
+        const gameObject = new Fog(data, this);
+        gameObject.draw();
+        return gameObject;
+    }));
+}
 
 /**
  * Sends a request to add a building to the server
@@ -109,15 +115,14 @@ Game.prototype.addNewBuilding = function(position, type) {
  * @param {response} response Server response in the form: 
  */
 Game.prototype.__addNewBuilding = function(response) {
-    const index = response.index;
+    const p = response.position;
     const building = this.getBuilding(response);
-    this.map[index].addFog(-1);
-    this.map[index].checkFog();
-    this.map[index].setObject(building);
-    delete this.map[index];
-    this.map[index] = building;
-    this.map[index].draw();
-    this.setFog(this.map[index], 2, -1);
+    this.gameObjects[p.x][p.y].push(building);
+    this.gameObjects[p.x][p.y].forEach(o => o.draw());
+    if(response.owner == this.player.id) {
+        this.visibility[p.x][p.y].addFog(-1);
+        this.gameObjects[p.x][p.y].forEach(o => this.setFog(o, -1));
+    }
 };
 
 /**
@@ -136,15 +141,11 @@ Game.prototype.addNewWorker = function(object) {
  * @param {response} response Server response in the form: 
  */
 Game.prototype.__addNewWorker = function(response) {
-    for(let i = 0; i < this.map.length; i++) {
-        if(this.map[i].id === response.id) {
-            this.map[i].workers = response.workers;
-            this.map[i].gameObject.click();
-            this.player.addNewWorker(this.map[i].type);
-            this.player.printResources();
-            break;
-        }
-    }
+    let gameObject = this.getGameObject(response.id);
+    gameObject.workers = response.workers;
+    gameObject.gameObject.click();
+    this.player.addNewWorker(gameObject.type);
+    this.player.printResources();
 };
 
 /**
@@ -152,7 +153,6 @@ Game.prototype.__addNewWorker = function(response) {
  * @param {object} object Object to be modified.
  */
 Game.prototype.addNewSoldier = function(object) {
-    console.log("[CLIENT -> SERVER] addNewSoldier");
     this.socket.emit('game_addNewSoldier', {
         object: object,
         player: this.player.id
@@ -164,38 +164,33 @@ Game.prototype.addNewSoldier = function(object) {
  * @param {response} response Server response in the form: 
  */
 Game.prototype.__addNewSoldier = function(response) {
-    for(let i = 0; i < this.map.length; i++) {
-        if(this.map[i].id === response.id) {
-            this.map[i].workers = response.workers;
-            this.map[i].showOptions();
-            this.player.printResources();
-            break;
-        }
-    }
-}
+    let gameObject = this.getGameObject(response.id);
+    gameObject.workers = response.workers;
+    gameObject.showOptions();
+    this.player.printResources();
+};
 
 /**
  * Sends a request to add a new soldier to the server.
  * @param {object} object Object to be modified.
  */
  Game.prototype.addNewDefender = function(object) {
-    console.log("[CLIENT -> SERVER] addNewDefender");
     this.socket.emit('game_addNewDefender', {
         object: object,
         player: this.player.id
     });
 }
 
+/**
+ * Handles of responses from the server about adding a new defender.
+ * @param {response} response Server response in the form: 
+ */
 Game.prototype.__addNewDefender = function(response) {
-    for(let i = 0; i < this.map.length; i++) {
-        if(this.map[i].id === response.id) {
-            this.map[i].workers = response.workers;
-            this.map[i].life = response.life;
-            this.map[i].showOptions();
-            this.player.printResources();
-            break;
-        }
-    }
+    let gameObject = this.getGameObject(response.id);
+    gameObject.workers = response.workers;
+    gameObject.life += response.life;
+    gameObject.currentLife += response.life;
+    gameObject.showOptions();
 }
 
 /**
@@ -207,34 +202,6 @@ Game.prototype.addForceLimit = function(object) {
         object: object,
         player: this.player.id
     });
-}
-
-/**
- * Sends a request to add a new squad to the server.
- * @param {position} position Position of the squad.
- */
-Game.prototype.addNewSquad = function(position) {
-    this.socket.emit('game_addNewSquad', {
-        id: this.player.id,
-        position: position
-    });
-}
-
-/**
- * Handles of responses from the server about adding a new squad.
- * @param {response} response Server response in the form: 
- */
-Game.prototype.__addNewSquad = function(response) {
-    console.log(response);
-    const index = response.index;
-    const building = this.getBuilding(response);
-    this.map[index].addFog(-1);
-    this.map[index].checkFog();
-    this.map[index].setObject(building);
-    delete this.map[index];
-    this.map[index] = building;
-    this.map[index].draw();
-    this.setFog(this.map[index], 1, -1);
 }
 
 /**
@@ -269,21 +236,17 @@ Game.prototype.moveSquad = function(object, position) {
 Game.prototype.__moveSquad = function(response) {
     const previous = response.previous;
     const current = response.current;
-    this.map[current] = this.map[previous];
-    const data = {
-        id: -1,
-        owner: 'default',
-        position: { x: response.previousPosition.x, y: response.previousPosition.y },
-        type: 'grass',
-        color: 0
+    let previousElements = this.gameObjects[previous.x][previous.y];
+    let currentElements = this.gameObjects[current.x][current.y];
+    let gameObject = this.getGameObject(response.id);
+    currentElements.push(gameObject);
+    previousElements = previousElements.filter(o => o.id != gameObject.id);
+    this.gameObjects[previous.x][previous.y] = previousElements;
+    gameObject.move(current);
+    if(gameObject.owner == this.player.id) {
+        previousElements.forEach(o => this.setFog(o, 2));
+        currentElements.forEach(o => this.setFog(o, -1));
     }
-    this.map[current].move(response.currentPosition);
-    this.map[previous] = new Area(data, this);
-    this.map[previous].draw();
-    //this.map[previous].addFog(1);
-    this.map[previous].checkFog();
-    this.setFog(this.map[previous], 1, 1);
-    this.setFog(this.map[current], 1, -1);
 }
 
 /**
@@ -299,12 +262,44 @@ Game.prototype.__error = function(response) {
     logs.scrollTop = logs.scrollHeight;
 }
 
-Game.prototype.setFog = function(gameObject, radius, value) {
-    for(let i = gameObject.position.x - radius; i < gameObject.position.x + radius + 1; i++) {
-        for(let j = gameObject.position.y - radius; j < gameObject.position.y + radius + 1; j++) {
-            if(i < 0 || j < 0 || i > this.config.height || j > this.config.width) continue;
-            this.map[i * this.config.width + j].addFog(value);
-            this.map[i * this.config.width + j].checkFog();
+/**
+ * 
+ * @param {GameObject} o gameObject
+ * @param {boolean} v value
+ */
+Game.prototype.setFog = function(o, v) {
+    let radius = o.visibilityRange;
+    var x = 0, y = 0;
+    for(let i = o.position.x - radius; i < o.position.x + radius + 1; i++) {
+        x++;
+        for(let j = o.position.y - radius; j < o.position.y + radius + 1; j++) {
+            y++
+            if(i < 0 || j < 0 || i > this.config.height - 1 || j > this.config.width - 1) continue;
+            if(radius > 1 && (x == y && (x == 1 || x == radius * 2 + 1))) {
+                continue;
+            }
+            if(radius > 1 && ((x == 1 && y == radius * 2 + 1) || x == radius * 2 + 1 && y == 1)) continue;
+            this.visibility[i][j].addFog(v);
+            this.visibility[i][j].checkFog();   
         }
+        y = 0;
     }
+}
+
+Game.prototype.getGameObject = function(id) {
+    let gameObject;
+    this.gameObjects.every(
+        vi => vi.every(
+            vj => vj.every(
+                vk => {
+                    if(vk.id === id) {
+                        gameObject = vk;
+                        return false;
+                    }
+                    return true;
+                }
+            )
+        )
+    )
+    return gameObject;
 }

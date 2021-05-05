@@ -9,9 +9,9 @@ class Game {
     constructor(io) {
         this.io = io;
         /**
-         * Array containing game objects.
+         * 3D Array containing game objects.
          */
-        this.gameObjects = [];
+        this.gameObjects;
         /**
          * Array containing players.
          */
@@ -24,18 +24,7 @@ class Game {
  * Initialization of the game. Creating array of default objects and bases at initial positions.
  */
 Game.prototype.init = function() {
-    const map = [];
-    for(let i = 0; i < config.params.height; i++) {
-        for(let j = 0; j < config.params.width; j++) {
-            let index = i * config.params.width + j; 
-            map[index] = 0;
-            this.gameObjects[index] = {
-                id: uniqueID(),
-                type: 'area',
-                owner: 'default'
-            };
-        }
-    }
+    this.initGameObjects();
     let color = 0;
     Object.values(this.players).forEach(player => {
         player.init(color);
@@ -54,6 +43,22 @@ Game.prototype.init = function() {
             position: player.initCoords
         });
     });
+}
+
+Game.prototype.initGameObjects = function() {
+    this.gameObjects = Array.apply(null, new Array(config.params.height)).map(
+        () => Array.apply(null, new Array(config.params.width)).map(
+            () => Array.apply(null, new Array(1)).map(
+                () => {
+                    return {
+                        id: uniqueID(),
+                        type: 'area',
+                        owner: 'default'
+                    };
+                }
+            )
+        )
+    );
 }
 
 /**
@@ -75,7 +80,7 @@ Game.prototype.update = function() {
 Game.prototype.addNewPlayer = function(player) {
     if(!Object.keys(this.players).includes(player.id)) {
         this.players[`${player.id}`] = player;
-        console.log("Added new player to the game!");
+        console.log(`Added new player {${player.username}} to the game!`);
     }
 }
 
@@ -117,16 +122,15 @@ Game.prototype.__addNewBuilding = function(request) {
     const owner = this.players[`${request.id}`];
     const canBuy = this.canBuy(owner, request.type);
     const canBuild = this.canBuild(request.position);
+    const p = request.position;
     if(canBuy.value === true && canBuild.value === true) {
-        const index = request.position.x * config.params.width + request.position.y;
-        const gameObject = this.getGameObject(owner, request.type, request.position);
+        const gameObject = this.createGameObject(owner, request.type, request.position);
         owner.buy(request.type);
-        this.gameObjects[index] = gameObject;
+        this.gameObjects[p.x][p.y].push(gameObject);
         owner.addGameObject(gameObject);
         const data = Object.assign({}, gameObject);
         data['position'] = request.position,
         data['type'] = request.type;
-        data['index'] = index;
         data['color'] = owner.color;
         Object.values(this.players).forEach(player => {
             this.io.to(player.id).emit('game__addNewBuilding', data);
@@ -149,45 +153,17 @@ Game.prototype.__addNewBuilding = function(request) {
 Game.prototype.__addNewWorker = function(request) {
     const player = this.players[`${request.object.owner}`];
     if(this.players[`${request.player}`].gameObjects.some(o => o.id === request.object.id)) {
-        let gameObject;
-        for(let i = 0; i < this.gameObjects.length; i++) {
-            gameObject = this.gameObjects[i];
-            const canBuy = this.canBuy(player, 'workers');
-            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
-                player.buy('workers');
-                gameObject.workers += 1;
-                player.addNewWorker(gameObject.type);
-                this.io.to(request.object.owner).emit('game__addNewWorker', {
-                    id: request.object.id,
-                    workers: gameObject['workers']
-                });
-            }
+        let gameObject = this.getGameObject(request.object.id);
+        const canBuy = this.canBuy(player, 'workers');
+        if(gameObject != null && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
+            player.buy('workers');
+            gameObject.workers += 1;
+            player.addNewWorker(gameObject.type);
+            this.io.to(request.object.owner).emit('game__addNewWorker', {
+                id: request.object.id,
+                workers: gameObject['workers']
+            });
         }
-    }   
-}
-
-/**
- * Adds a new squad.
- * @param {request} request Request from the client.
- */
-Game.prototype.__addNewSquad = function(request) {
-    const owner = this.players[`${request.id}`];
-    const canBuy = this.canBuy(owner, 'squad');
-    const canMove = this.canMove(request.position);
-    if(canBuy.value === true && canMove.value === true && owner.force + 1 <= owner.forceLimit) {
-        const index = request.position.x * config.params.width + request.position.y;
-        const gameObject = this.getGameObject(owner, 'squad', request.position);
-        owner.buy('squad');
-        this.gameObjects[index] = gameObject;
-        owner.addGameObject(gameObject);
-        const data = Object.assign({}, gameObject);
-        data['position'] = request.position,
-        data['type'] = 'squad';
-        data['index'] = index;
-        data['color'] = owner.color;
-        Object.values(this.players).forEach(player => {
-            this.io.to(player.id).emit('game__addNewSquad', data);
-        });
     }
 }
 
@@ -198,30 +174,27 @@ Game.prototype.__addNewSquad = function(request) {
 Game.prototype.__addNewSoldier = function(request) {
     const player = this.players[`${request.object.owner}`];
     if(this.players[`${request.player}`].gameObjects.some(o => o.id === request.object.id)) {
-        let gameObject;
-        for(let i = 0; i < this.gameObjects.length; i++) {
-            gameObject = this.gameObjects[i];
-            const canBuy = this.canBuy(player, 'squad');
-            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true && player.force + 1 <= player.forceLimit) {
-                player.buy('squad');
-                gameObject.workers += 1;
-                player.addNewSoldier();
-                this.io.to(request.object.owner).emit('game__addNewSoldier', {
-                    id: request.object.id,
-                    workers: gameObject['workers']
-                });
-                console.log("[SERVER -> CLIENT] __addNewSoldier");
-            }
-            else {
-                this.io.to(request.id).emit('game__error', {
-                    date: getDate(),
-                    author: player.username,
-                    type: 'error',
-                    message: 'Unable to build this structure!'
-                });
-            }
+        let gameObject = this.getGameObject(request.object.id);
+        const canBuy = this.canBuy(player, 'squad');
+        if(gameObject != null && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true && player.force + 1 <= player.forceLimit) {
+            player.buy('squad');
+            gameObject.workers += 1;
+            player.addNewSoldier();
+            this.io.to(request.object.owner).emit('game__addNewSoldier', {
+                id: request.object.id,
+                workers: gameObject['workers']
+            });
+            console.log("[SERVER -> CLIENT] __addNewSoldier");
         }
-    }   
+        else {
+            this.io.to(request.id).emit('game__error', {
+                date: getDate(),
+                author: player.username,
+                type: 'error',
+                message: 'Unable to build this structure!'
+            });
+        }
+    }
 }
 
 
@@ -232,21 +205,18 @@ Game.prototype.__addNewSoldier = function(request) {
  Game.prototype.__addNewDefender = function(request) {
     const player = this.players[`${request.object.owner}`];
     if(this.players[`${request.player}`].gameObjects.some(o => o.id === request.object.id)) {
-        let gameObject;
-        for(let i = 0; i < this.gameObjects.length; i++) {
-            gameObject = this.gameObjects[i];
-            const canBuy = this.canBuy(player, 'workers');
-            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
-                player.buy('workers');
-                gameObject.workers += 1;
-                gameObject.life += 10;
-                player.addNewWorker(gameObject.type);
-                this.io.to(request.object.owner).emit('game__addNewDefender', {
-                    id: request.object.id,
-                    workers: gameObject['workers'],
-                    life: gameObject.life
-                });
-            }
+        let gameObject = this.getGameObject(request.object.id);
+        const canBuy = this.canBuy(player, 'workers');
+        if(gameObject != null && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
+            player.buy('workers');
+            gameObject.workers += 1;
+            gameObject.stats.life += 10;
+            player.addNewWorker(gameObject.type);
+            this.io.to(request.object.owner).emit('game__addNewDefender', {
+                id: request.object.id,
+                workers: gameObject['workers'],
+                life: 10
+            });
         }
     }   
 }
@@ -258,30 +228,27 @@ Game.prototype.__addNewSoldier = function(request) {
 Game.prototype.__addForceLimit = function(request) {
     const player = this.players[`${request.object.owner}`];
     if(this.players[`${request.player}`].gameObjects.some(o => o.id === request.object.id)) {
-        let gameObject;
-        for(let i = 0; i < this.gameObjects.length; i++) {
-            gameObject = this.gameObjects[i];
-            const canBuy = this.canBuy(player, 'forceLimit');
-            if (canBuy.value === false) {
-                this.io.to(player.id).emit('game__error', {
-                    date: getDate(),
-                    author: player.username,
-                    type: 'error',
-                    message: 'Unable to upgrade force limit!'
-                });
-                return;
-            }
-            if(gameObject.id === request.object.id && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
-                player.buy('forceLimit');
-                gameObject.workers += 1;
-                player.addNewWorker(gameObject.type);
-                player.addForceLimit(5);
-                this.io.to(request.object.owner).emit('game__addNewWorker', {
-                    id: request.object.id,
-                    workers: gameObject['workers']
-                });
-                return;
-            }
+        let gameObject = this.getGameObject(request.object.id);
+        const canBuy = this.canBuy(player, 'forceLimit');
+        if (canBuy.value === false) {
+            this.io.to(player.id).emit('game__error', {
+                date: getDate(),
+                author: player.username,
+                type: 'error',
+                message: 'Unable to upgrade force limit!'
+            });
+            return;
+        }
+        if(gameObject != null && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
+            player.buy('forceLimit');
+            gameObject.workers += 1;
+            player.addNewWorker(gameObject.type);
+            player.addForceLimit(5);
+            this.io.to(request.object.owner).emit('game__addNewWorker', {
+                id: request.object.id,
+                workers: gameObject['workers']
+            });
+            return;
         }
     }   
 }
@@ -299,13 +266,13 @@ Game.prototype.canBuy = function(player, type) {
     });
     return ret;
 }
+
 /**
  * Checks if an object can be placed at the given position.
  * @param {position} position Position of the object.
  */
 Game.prototype.canBuild = function(position) {
-    const index = position.x * config.params.width + position.y;
-    if(this.gameObjects[index].type === 'area') return { value: true };
+    if(this.gameObjects[position.x][position.y].length < 2) return { value: true };
     return { value: false, message: `Can't build at { x: ${position.x}, y: ${position.y} }` };
 }
 
@@ -315,7 +282,7 @@ Game.prototype.canBuild = function(position) {
  */
 Game.prototype.canMove = function(position) {
     const index = position.x * config.params.width + position.y;
-    if(this.gameObjects[index].type === 'area') return { value: true };
+    if(this.gameObjects[position.x][position.y].length < 2) return { value: true };
     return { value: false, message: `Can't move to { x: ${position.x}, y: ${position.y} }` };
 }
 
@@ -325,7 +292,7 @@ Game.prototype.canMove = function(position) {
  * @param {String} type Type of the object being purchased.
  * @param {position} position Position of the object.
  */
-Game.prototype.getGameObject =  function(player, type, position) {
+Game.prototype.createGameObject =  function(player, type, position) {
     const index = position.x * config.params.width + position.y;
     const gameObject = {
         id: uniqueID(),
@@ -333,7 +300,7 @@ Game.prototype.getGameObject =  function(player, type, position) {
         type: type,
         workers: 1,
         costs: costs[`${type}`],
-        stats: stats[`${type}`]
+        stats: Object.assign({}, stats[`${type}`])
     };
     switch(type) {
         case 'tower':
@@ -385,34 +352,47 @@ Game.prototype.__moveSquad = function(request) {
         let delay = 0;
         let timers = [];
         for(let i = 1; i < path.length; i++) {
-            let previous = path[i - 1].x * config.params.width + path[i - 1].y;
-            let current = path[i].x * config.params.width + path[i].y;
-            const previousPosition = path[i - 1];
-            const currentPosition = path[i];
+            const previous = path[i - 1];
+            const current = path[i];
+            let previousElements = this.gameObjects[previous.x][previous.y];
+            let currentElements = this.gameObjects[current.x][current.y];
             timers[i] = setTimeout(() => {
-                if(this.gameObjects[current].type != 'area') {
+                if(this.gameObjects[current.x][current.y].length > 1) {
                     timers.forEach(t => clearTimeout(t));
                     return;
                 }
-                this.gameObjects[current] = this.gameObjects[previous];
-                this.gameObjects[previous] = {
-                    id: uniqueID(),
-                    type: 'area',
-                    owner: 'default'
-                };
+                let gameObject = this.getGameObject(request.object.id);
+                currentElements.push(gameObject);
+                this.gameObjects[previous.x][previous.y] = previousElements.filter(o => o.id != request.object.id);
                 this.io.emit('game__moveSquad', {
                     id: request.object.id,
                     previous: previous,
-                    current: current,
-                    previousPosition: previousPosition,
-                    currentPosition: currentPosition
+                    current: current
                 });
             }, delay);
-            delay += 300;
+            delay += 500;
         }
     }
 }
 
 module.exports = {
     Game: Game
+}
+
+Game.prototype.getGameObject = function(id) {
+    let gameObject;
+    this.gameObjects.every(
+        vi => vi.every(
+            vj => vj.every(
+                vk => {
+                    if(vk.id === id) {
+                        gameObject = vk;
+                        return false;
+                    }
+                    return true;
+                }
+            )
+        )
+    )
+    return gameObject;
 }

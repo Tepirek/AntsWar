@@ -20,7 +20,8 @@ class Player {
  * Initializes the player.
  * @param {response} response Response from the server in the form: 
  */
-Player.prototype.init = function(response) {       
+Player.prototype.init = function(response) {     
+    console.log(response);  
     this.id = response.id;
     this.color = response.color;
     this.resources = response.resources;

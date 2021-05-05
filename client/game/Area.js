@@ -97,17 +97,11 @@ Area.prototype.mouseleave = function() {
  * Supports adding objects to the map
  */
 Area.prototype.click = function() {
-    console.log(this);
     if(this.type = 'grass') {
         if(this.free) {
             let action = JSON.parse(localStorage.getItem('action'));
             if(action.type == 'drag') {
-                if(action.target == 'squad') {
-                    this.game.addNewSquad(this.position);
-                }
-                else {
-                    this.game.addNewBuilding(this.position, action.target);
-                }
+                this.game.addNewBuilding(this.position, action.target);
             }
             else if(action.type == 'move') {
                 this.gameObject.innerHTML = "";

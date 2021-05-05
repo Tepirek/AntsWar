@@ -41,8 +41,11 @@ Business.prototype.showOptions = function() {
     buildingsTip.className = 'buildingsTip';
     const button = document.querySelector('#addWorker');
     button.onclick = () => {
-        this.game.addNewWorker(this);
-        this.gameObject.click();
+        if(this.type === 'wall') {
+            this.game.addNewDefender(this);
+        } else {
+            this.game.addNewWorker(this);
+        }
     }
     button.addEventListener('mouseenter', () => {
         buildingsTip.innerHTML = `

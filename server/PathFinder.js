@@ -17,7 +17,7 @@ PathFinder.prototype.init = function(gameObjects) {
     }
     for(var i = 0; i < this.cols; i++) {
         for(var j = 0; j < this.rows; j++) {
-            if(gameObjects[i * this.rows + j].type != 'area') {
+            if(gameObjects[i][j].length > 1) {
                 this.grid[i][j] = new Spot(i, j, true);
             }
             else {

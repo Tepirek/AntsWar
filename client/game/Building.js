@@ -3,6 +3,7 @@ class Building extends GameObject {
         super(data, game);
         this.currentLife = data.stats.life;
         this.life = data.stats.life;
+        this. visibilityRange = data.stats.visibilityRange;
         this.costs = data.costs;
     };
 };
