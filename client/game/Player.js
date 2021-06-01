@@ -20,8 +20,7 @@ class Player {
  * Initializes the player.
  * @param {response} response Response from the server in the form: 
  */
-Player.prototype.init = function(response) {     
-    console.log(response);  
+Player.prototype.init = function(response) { 
     this.id = response.id;
     this.color = response.color;
     this.resources = response.resources;
@@ -30,14 +29,14 @@ Player.prototype.init = function(response) {
     this.costs = response.costs;
     this.force = response.force;
     this.forceLimit = response.forceLimit;
-    this.createBuilding('Tower');
     this.createBuilding('Mine');
     this.createBuilding('Sawmill');
     this.createBuilding('Quarry');
     this.createBuilding('Farm');
-    this.createBuilding('Base');
-    this.createBuilding('Squad');
+    this.createBuilding('Tower');
     this.createBuilding('Wall');
+    this.createBuilding('Squad');
+    this.createBuilding('Base');
 };
 
 /**

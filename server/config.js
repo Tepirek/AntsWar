@@ -134,7 +134,7 @@ const config = {
         }
     },
     lobby: {
-        capacity: 2,
+        capacity: 1,
         delay: 500
     },
     player: {

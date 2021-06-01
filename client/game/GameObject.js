@@ -9,7 +9,9 @@ class GameObject {
         this.size = this.game.config.areaSize;
         this.visibilityRange = 1;
         this.gameObject = document.createElement('div');
+        this.lifeBar = document.createElement('div');
         this.setStyle();
+        this.createLifeBar();
     };
 };
 
@@ -19,9 +21,6 @@ class GameObject {
 GameObject.prototype.setStyle = function() {
     this.gameObject.style = `
         position:absolute;
-        display: flex;
-        align-items: center;
-        justify-content: space-evenly;
         color: #ffffff;
         width:${this.size}px;
         height:${this.size}px;
@@ -43,4 +42,20 @@ GameObject.prototype.remove = function() {
     if(this.gameObject.parentElement) {
         this.gameObject.parentElement.removeChild(this.gameObject);
     }
+}
+
+GameObject.prototype.createLifeBar = function() {
+    this.lifeBar.style = `
+        box-sizing: border-box;
+        position: relative;
+        bottom: 0px;
+        left: 0px;
+        width: 24px;
+        height: 8px;
+        border: 1px solid #000000;
+        background-color: #000000;
+        z-index: 1999;
+        display: none;
+    `;
+    this.gameObject.appendChild(this.lifeBar);
 }

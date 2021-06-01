@@ -5,6 +5,7 @@ class Game {
          */
         this.gameObjects;
         this.visibility;
+        this.lifeBarVisible = false;
         this.player = player;
         this.gameBoard = document.querySelector('.gameBoard');
         this.gameOptions = document.querySelector('.gameOptions');
@@ -24,6 +25,24 @@ class Game {
         this.socket.on('game__addNewDefender', response => this.__addNewDefender(response));
         this.socket.on('game__moveSquad', response => this.__moveSquad(response));
         this.socket.on('game__error', response => this.__error(response));
+        
+        document.addEventListener('keydown', e => {
+            if(e.keyCode === 9) {
+                e.preventDefault();
+                if(this.gameObjects != undefined && this.gameObjects.length > 0) {
+                    this.gameObjects.forEach(row => {
+                        row.forEach(column => {
+                            column.forEach(elem => {
+                                if (elem.id != -1) {
+                                    elem.showLifeBar(this.lifeBarVisible);
+                                }
+                            });
+                        });
+                    });
+                    this.lifeBarVisible = !this.lifeBarVisible;
+                }
+            }
+        }, false);
     }
 };
 
