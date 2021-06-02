@@ -105,7 +105,14 @@ Area.prototype.click = function() {
             }
             else if(action.type == 'move') {
                 this.gameObject.innerHTML = "";
-                this.game.moveSquad(action.object, this.position);
+                if(Array.isArray(action.object)) {
+                    action.object.forEach(o => {
+                        Object.assign(o, Squad.prototype);
+                        o.unselect();
+                    });
+                    this.game.moveHerd(action.object, this.position);
+                }
+                else this.game.moveSquad(action.object, this.position);
             }
             action = { type: '', target: '', object: null };
             localStorage.setItem('action', JSON.stringify(action));

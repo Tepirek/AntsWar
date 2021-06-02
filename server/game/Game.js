@@ -166,10 +166,22 @@ Game.prototype.__addNewWorker = function(request) {
         if(gameObject != null && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
             player.buy('workers');
             gameObject.workers += 1;
+            gameObject.stats.currentLife += stats[gameObject.type].life;
+            gameObject.stats.life += stats[gameObject.type].life;
             player.addNewWorker(gameObject.type);
             this.io.to(request.object.owner).emit('game__addNewWorker', {
                 id: request.object.id,
-                workers: gameObject['workers']
+                workers: gameObject['workers'],
+                currentLife: gameObject.stats.currentLife,
+                life: gameObject.stats.life
+            });
+        }
+        else {
+            this.io.to(request.id).emit('game__error', {
+                date: getDate(),
+                author: player.username,
+                type: 'error',
+                message: 'Unable to build this structure!'
             });
         }
     }
@@ -187,12 +199,19 @@ Game.prototype.__addNewSoldier = function(request) {
         if(gameObject != null && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true && player.force + 1 <= player.forceLimit) {
             player.buy('squad');
             gameObject.workers += 1;
+            gameObject.stats.currentLife += stats.squad.life;
+            gameObject.stats.life += stats.squad.life;
+            gameObject.stats.attack += stats.squad.attack;
+            gameObject.stats.defense += stats.squad.defense;
             player.addNewSoldier();
             this.io.to(request.object.owner).emit('game__addNewSoldier', {
                 id: request.object.id,
-                workers: gameObject['workers']
+                workers: gameObject['workers'],
+                currentLife: gameObject.stats.currentLife,
+                life: gameObject.stats.life,
+                attack: gameObject.stats.attack,
+                defense: gameObject.stats.defense
             });
-            console.log("[SERVER -> CLIENT] __addNewSoldier");
         }
         else {
             this.io.to(request.id).emit('game__error', {
@@ -218,12 +237,14 @@ Game.prototype.__addNewSoldier = function(request) {
         if(gameObject != null && gameObject.workers + 1 <= gameObject.stats.capacity && canBuy.value === true) {
             player.buy('workers');
             gameObject.workers += 1;
-            gameObject.stats.life += 10;
+            gameObject.stats.currentLife += stats.wall.life;
+            gameObject.stats.life += stats.wall.life;
             player.addNewWorker(gameObject.type);
             this.io.to(request.object.owner).emit('game__addNewDefender', {
                 id: request.object.id,
                 workers: gameObject['workers'],
-                life: 10
+                currentLife: gameObject.stats.currentLife,
+                life: gameObject.stats.life
             });
         }
     }   
@@ -418,7 +439,16 @@ Game.prototype.__battle = function(request) {
     const a = this.getGameObject(request.attacker.id);
     const d = this.getGameObject(request.defender.id);
     let interval = setInterval(() => {
-        if(a == undefined || d == undefined || a.stats.currentLife <= 0 || d.stats.currentLife <= 0 || !this.checkIfNeighbors(a, d)) {
+        if(a == undefined || d == undefined || !this.checkIfNeighbors(a, d)) {
+            clearInterval(interval);
+            return;
+        }
+        if(a.stats.currentLife <= 0 || d.stats.currentLife <= 0) {
+            this.io.emit("game__destroyGameObject", {
+                id: d.id
+            });
+            if(a.stats.currentLife <= 0) removeGameObject(a);
+            if(d.stats.currentLife <= 0) this.removeGameObject(d);
             clearInterval(interval);
             return;
         }
@@ -449,6 +479,13 @@ Game.prototype.checkIfNeighbors = function(o1, o2) {
 
 Game.prototype.updatePosition = function(object, position) {
     object.position = position;
+}
+
+Game.prototype.removeGameObject = function(object) {
+    const x = object.position.x;
+    const y = object.position.y;
+    this.players.forEach(p => p.removeGameObject(object.id));
+    this.gameObjects[x][y] = this.gameObjects[x][y].filter(o => o.id != object.id);
 }
 
 module.exports = {

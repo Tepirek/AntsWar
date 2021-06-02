@@ -27,6 +27,7 @@ class Game {
         this.socket.on('game__battle', response => this.__battle(response));
         this.socket.on('game__error', response => this.__error(response));
         this.socket.on('game__getGameObjects', response => this.__getGameObjects(response));
+        this.socket.on('game__destroyGameObject', response => this.__destroyGameObject(response));
         
         document.addEventListener('keydown', e => {
             if(e.keyCode === 9) {
@@ -140,6 +141,9 @@ Game.prototype.__addNewBuilding = function(response) {
     const building = this.getBuilding(response);
     this.gameObjects[p.x][p.y].push(building);
     this.gameObjects[p.x][p.y].forEach(o => o.draw());
+    this.gameObjects[p.x][p.y].forEach(o => {
+        if(o.id != -1) o.showOptions();
+    });
     if(response.owner == this.player.id) {
         this.visibility[p.x][p.y].addFog(-1);
         this.gameObjects[p.x][p.y].forEach(o => this.setFog(o, -1));
@@ -167,6 +171,8 @@ Game.prototype.addNewWorker = function(object) {
 Game.prototype.__addNewWorker = function(response) {
     let gameObject = this.getGameObject(response.id);
     gameObject.workers = response.workers;
+    gameObject.currentLife = response.currentLife;
+    gameObject.life = response.life;
     gameObject.gameObject.click();
     this.player.addNewWorker(gameObject.type);
     this.player.printResources();
@@ -190,7 +196,12 @@ Game.prototype.addNewSoldier = function(object) {
 Game.prototype.__addNewSoldier = function(response) {
     let gameObject = this.getGameObject(response.id);
     gameObject.workers = response.workers;
+    gameObject.currentLife = response.currentLife;
+    gameObject.life = response.life;
+    gameObject.attack = response.attack;
+    gameObject.defense = response.defense;
     gameObject.showOptions();
+    gameObject.updateOptions();
     this.player.printResources();
 };
 
@@ -212,8 +223,8 @@ Game.prototype.__addNewSoldier = function(response) {
 Game.prototype.__addNewDefender = function(response) {
     let gameObject = this.getGameObject(response.id);
     gameObject.workers = response.workers;
-    gameObject.life += response.life;
-    gameObject.currentLife += response.life;
+    gameObject.currentLife = response.currentLife;
+    gameObject.life = response.life;
     gameObject.showOptions();
 }
 
@@ -255,6 +266,14 @@ Game.prototype.moveSquad = function(object, position) {
         position: position,
         player: this.player.id
     });
+}
+
+Game.prototype.moveHerd = function(herd, position) {
+    herd.forEach(squad => this.socket.emit('game_moveSquad', {
+        object: squad,
+        position: position,
+        player: this.player.id
+    }));
 }
 
 Game.prototype.__moveSquad = function(response) {
@@ -336,7 +355,6 @@ Game.prototype.battle = function(attacker, defender) {
 }
 
 Game.prototype.__battle = function(response) {
-    console.log(response);
     var a = response.attacker;
     var d = response.defender;
     const aObject = this.getGameObject(a.id);
@@ -359,4 +377,9 @@ Game.prototype.__getGameObjects = function(response) {
             })
         }
     }
+}
+
+Game.prototype.__destroyGameObject = function(response) {
+    const gameObject = this.getGameObject(response.id).gameObject;
+    if(gameObject.parentNode) gameObject.parentNode.removeChild(gameObject);
 }

@@ -24,6 +24,46 @@ Business.prototype.initOptions = function() {
             </tr>
         </table>
     `;
+    var addButton = document.querySelector('#addWorker');
+    addButton.addEventListener('click', () => {
+        if(this.type === 'wall') {
+            this.game.addNewDefender(this);
+        } else {
+            this.game.addNewWorker(this);
+        }
+    });
+    var tip = document.querySelectorAll('.buildingTipRemovable');
+    if(tip != undefined) tip.forEach(t => t.parentNode.removeChild(t));
+    const buildingsTip = document.createElement('div');
+    buildingsTip.id = this.id;
+    buildingsTip.className = 'buildingsTip buildingTipRemovable';
+    addButton.addEventListener('mouseenter', () => {
+        buildingsTip.innerHTML = `
+            <div class="buildingsTip">
+                <div class="buildingsTipResource">
+                    <img src="src/img/gold.png" alt="gold"> ${this.costs.gold}
+                </div>
+                <div class="buildingsTipResource">
+                    <img src="src/img/wood.png" alt="wood"> ${this.costs.wood}
+                </div>
+                <div class="buildingsTipResource">
+                    <img src="src/img/stone.png" alt="stone"> ${this.costs.stone}
+                </div>
+                <div class="buildingsTipResource">
+                    <img src="src/img/food.png" alt="food"> ${this.costs.food}
+                </div>
+            </div>
+        `;
+        const position = addButton.getBoundingClientRect();
+        buildingsTip.style.top = `${position.top - 10 - buildingsTip.offsetHeight * 2}px`;
+        buildingsTip.style.left = `${position.left - 10 + (addButton.offsetWidth - 10) / 2}px`;
+        buildingsTip.style.visibility = "visible";
+    });
+    addButton.addEventListener('mouseleave', () => {
+        buildingsTip.innerHTML = "";
+        buildingsTip.style.visibility = "hidden";
+    });
+    document.body.appendChild(buildingsTip);
 }
 
 Business.prototype.updateOptions = function() {
@@ -42,44 +82,6 @@ Business.prototype.showOptions = function() {
         tip.parentElement.removeChild(tip);
     }
     this.initOptions();
-    const buildingsTip = document.createElement('div');
-    buildingsTip.id = this.id;
-    buildingsTip.className = 'buildingsTip';
-    const button = document.querySelector('#addWorker');
-    button.onclick = () => {
-        if(this.type === 'wall') {
-            this.game.addNewDefender(this);
-        } else {
-            this.game.addNewWorker(this);
-        }
-    }
-    button.addEventListener('mouseenter', () => {
-        buildingsTip.innerHTML = `
-            <div class="buildingsTip">
-                <div class="buildingsTipResource">
-                    <img src="src/img/gold.png" alt="gold"> ${this.costs.gold}
-                </div>
-                <div class="buildingsTipResource">
-                    <img src="src/img/wood.png" alt="wood"> ${this.costs.wood}
-                </div>
-                <div class="buildingsTipResource">
-                    <img src="src/img/stone.png" alt="stone"> ${this.costs.stone}
-                </div>
-                <div class="buildingsTipResource">
-                    <img src="src/img/food.png" alt="food"> ${this.costs.food}
-                </div>
-            </div>
-        `;
-        const position = button.getBoundingClientRect();
-        buildingsTip.style.top = `${position.top - 10 - buildingsTip.offsetHeight * 2}px`;
-        buildingsTip.style.left = `${position.left - 10 + (button.offsetWidth - 10) / 2}px`;
-        buildingsTip.style.visibility = "visible";
-    });
-    button.addEventListener('mouseleave', () => {
-        buildingsTip.innerHTML = "";
-        buildingsTip.style.visibility = "hidden";
-    });
-    document.body.appendChild(buildingsTip);
 }
 
 Business.prototype.click = function() {
@@ -90,10 +92,25 @@ Business.prototype.click = function() {
             localStorage.setItem('action', JSON.stringify({ type: '', target: '' })); 
             this.showOptions();
         }
-        this.game.moveSquad(action.object, this.position);
+        if(Array.isArray(action.object)) {
+            action.object.forEach(o => {
+                Object.assign(o, Squad.prototype);
+                o.unselect();
+            });
+            this.game.moveHerd(action.object, this.position);
+        }
+        else this.game.moveSquad(action.object, this.position);
         action = { type: '', target: '', object: null };
         localStorage.setItem('action', JSON.stringify(action));
     } else {
+        var action = JSON.parse(localStorage.getItem('action'));
+        if(Array.isArray(action.object)) {
+            console.log(action.object);
+            action.object.forEach(o => {
+                Object.assign(o, Squad.prototype);
+                o.unselect();
+            });
+        }
         this.initOptions();
     }
 }

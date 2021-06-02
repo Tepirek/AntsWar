@@ -19,16 +19,16 @@ Building.prototype.showLifeBar = function(display) {
 
 Building.prototype.updateLifeBar = function() {
     this.lifeBar.innerHTML = ``;
-    const amount = Math.ceil(this.currentLife * 11 / this.life);
+    const amount = Math.ceil(this.currentLife * 22 / this.life);
     for (var i = 0; i < amount; i++) {
         const lifeBlock = document.createElement('div');
         lifeBlock.style = `
             box-sizing: border-box;
             position: absolute;
             top: 0px;
-            left: ${i * 2}px;
+            left: ${i}px;
             height: 6px;
-            width: 2px;
+            width: 1px;
             background-color: #1be393;
         `;
         this.lifeBar.appendChild(lifeBlock);

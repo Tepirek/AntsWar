@@ -18,40 +18,40 @@ const config = {
      */
     costs: {
         tower: {
-            gold: 20,
-            wood: 20,
-            stone: 20,
-            food: 20
+            gold: 200,
+            wood: 200,
+            stone: 200,
+            food: 200
         },
         mine: {
-            gold: 20,
-            wood: 20,
-            stone: 20,
-            food: 20
+            gold: 200,
+            wood: 200,
+            stone: 200,
+            food: 200
         },
         sawmill: {
-            gold: 20,
-            wood: 20,
-            stone: 20,
-            food: 20
+            gold: 200,
+            wood: 200,
+            stone: 200,
+            food: 200
         },
         quarry: {
-            gold: 20,
-            wood: 20,
-            stone: 20,
-            food: 20
+            gold: 200,
+            wood: 200,
+            stone: 200,
+            food: 200
         },
         farm: {
-            gold: 20,
-            wood: 20,
-            stone: 20,
-            food: 20
+            gold: 200,
+            wood: 200,
+            stone: 200,
+            food: 200
         },
         base: {
-            gold: 1000,
-            wood: 1000,
-            stone: 1000,
-            food: 1000
+            gold: 5000,
+            wood: 5000,
+            stone: 5000,
+            food: 5000
         },
         squad: {
             gold: 200,
@@ -66,10 +66,10 @@ const config = {
             food: 200
         },
         workers: {
-            gold: 10,
-            wood: 10,
-            stone: 10,
-            food: 10
+            gold: 100,
+            wood: 100,
+            stone: 100,
+            food: 100
         },
         forceLimit: {
             gold: 2000,
@@ -132,10 +132,10 @@ const config = {
         },
         squad: {
             capacity: 10,
-            currentLife: 10,
-            life: 10,
+            currentLife: 50,
+            life: 50,
             visibilityRange: 1,
-            attack: 15,
+            attack: 10,
             defense: 10
         },
         wall: {
