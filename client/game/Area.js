@@ -110,5 +110,7 @@ Area.prototype.click = function() {
             action = { type: '', target: '', object: null };
             localStorage.setItem('action', JSON.stringify(action));
         }
+    } else if(this instanceof Building) {
+        console.log("Clicked on building");
     }
 }

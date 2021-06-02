@@ -155,6 +155,9 @@ Player.prototype.addForceLimit = function(force) {
  */
 Player.prototype.addGameObject = function(gameObject) {
     this.gameObjects.push(gameObject);
+    this.socket.emit('player__addGameObject', {
+        gameObject: gameObject
+    });
 }
 
 /**

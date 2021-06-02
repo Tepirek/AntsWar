@@ -46,14 +46,22 @@ Game.prototype.init = function() {
 }
 
 Game.prototype.initGameObjects = function() {
+    pos = 0;
     this.gameObjects = Array.apply(null, new Array(config.params.height)).map(
         () => Array.apply(null, new Array(config.params.width)).map(
             () => Array.apply(null, new Array(1)).map(
                 () => {
+                    let x = Math.floor(pos / config.params.width);
+                    let y = pos - (x * config.params.width)
+                    pos++;
                     return {
                         id: uniqueID(),
                         type: 'area',
-                        owner: 'default'
+                        owner: 'default',
+                        position: {
+                            x: x,
+                            y: y
+                        }
                     };
                 }
             )
@@ -300,7 +308,11 @@ Game.prototype.createGameObject =  function(player, type, position) {
         type: type,
         workers: 1,
         costs: costs[`${type}`],
-        stats: Object.assign({}, stats[`${type}`])
+        stats: Object.assign({}, stats[`${type}`]),
+        position: {
+            x: position.x,
+            y: position.y
+        }
     };
     switch(type) {
         case 'tower':
@@ -340,43 +352,48 @@ Game.prototype.createGameObject =  function(player, type, position) {
 Game.prototype.__moveSquad = function(request) {
     const player = this.players[`${request.object.owner}`];
     if(this.players[`${request.player}`].gameObjects.some(o => o.id === request.object.id)) {
-        const start = request.object.position;
+        var start = request.object.position;
         const end = request.position;
-        const pathFinder = new PathFinder(config.params.height, config.params.width);
-        pathFinder.init(this.gameObjects);
-        const path = pathFinder.find(start, end);
-        if(!path) {
-            console.log("No path");
-            return;
-        }
-        let delay = 0;
-        let timers = [];
-        for(let i = 1; i < path.length; i++) {
-            const previous = path[i - 1];
-            const current = path[i];
+        let interval = setInterval(() => {
+            var i = 1;
+            const pathFinder = new PathFinder(config.params.height, config.params.width);
+            pathFinder.init(this.gameObjects);
+            var path = pathFinder.find(start, end, undefined);
+            if(!path) {
+                console.log("No path");
+                clearInterval(interval);
+                return;
+            }
+            if(i >= path.length) {
+                clearInterval(interval);
+                return;
+            }
+            var previous = path[i - 1];
+            var current = path[i];
             let previousElements = this.gameObjects[previous.x][previous.y];
             let currentElements = this.gameObjects[current.x][current.y];
-            timers[i] = setTimeout(() => {
-                if(this.gameObjects[current.x][current.y].length > 1) {
-                    timers.forEach(t => clearTimeout(t));
-                    return;
-                }
-                let gameObject = this.getGameObject(request.object.id);
+            let gameObject = this.getGameObject(request.object.id);
+            if(this.gameObjects[current.x][current.y].length > 1) {
+                let defender = this.gameObjects[current.x][current.y].filter(o => o.type != "area")[0];
+                this.__battle({
+                    attacker: gameObject,
+                    defender: defender
+                });
+            } else {
                 currentElements.push(gameObject);
+                this.updatePosition(gameObject, current);
                 this.gameObjects[previous.x][previous.y] = previousElements.filter(o => o.id != request.object.id);
                 this.io.emit('game__moveSquad', {
                     id: request.object.id,
                     previous: previous,
                     current: current
                 });
-            }, delay);
-            delay += 500;
-        }
+            }
+            // this.io.emit('game__getGameObjects', {gameObjects: this.gameObjects});
+            start = current;
+            i++;
+        }, 500);
     }
-}
-
-module.exports = {
-    Game: Game
 }
 
 Game.prototype.getGameObject = function(id) {
@@ -395,4 +412,45 @@ Game.prototype.getGameObject = function(id) {
         )
     )
     return gameObject;
+}
+
+Game.prototype.__battle = function(request) {       
+    const a = this.getGameObject(request.attacker.id);
+    const d = this.getGameObject(request.defender.id);
+    let interval = setInterval(() => {
+        if(a == undefined || d == undefined || a.stats.currentLife <= 0 || d.stats.currentLife <= 0 || !this.checkIfNeighbors(a, d)) {
+            clearInterval(interval);
+            return;
+        }
+        d.stats.currentLife -= a.stats.attack;
+        if(d.stats.currentLife < 0) d.stats.currentLife = 0;
+        this.io.emit("game__battle", {
+            attacker: {
+                id: a.id,
+                currentLife: a.stats.currentLife
+            },
+            defender: {
+                id: d.id,
+                currentLife: d.stats.currentLife
+            }
+        });
+    }, 1000);
+}
+
+Game.prototype.checkIfNeighbors = function(o1, o2) {
+    for(var i = o1.position.x - 1; i < o1.position.x + 2; i++) {
+        for(var j = o1.position.y - 1; j < o1.position.y + 2; j++) {
+            if(i < 0 || j < 0 || i > 31 || j > 63) continue;
+            if(this.gameObjects[i][j].filter(o => o.id == o2.id).length > 0) return true;
+        }
+    }
+    return false;
+}
+
+Game.prototype.updatePosition = function(object, position) {
+    object.position = position;
+}
+
+module.exports = {
+    Game: Game
 }

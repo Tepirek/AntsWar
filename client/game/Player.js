@@ -13,6 +13,7 @@ class Player {
         this.socket.on('player__setWorkers', response => this.__setWorkers(response));
         this.socket.on('player__setForce', response => this.__setForce(response));
         this.socket.on('player__setForceLimit', response => this.__setForceLimit(response));
+        this.socket.on('player__addGameObject', response => this.__addGameObject(response));
     }
 }
 
@@ -158,6 +159,6 @@ Player.prototype.__setForceLimit = function(response) {
 /**
  * Adds gameObject.
  */
-Player.prototype.addGameObject = function(gameObject) {
-    this.gameObjects.push(gameObject);
+Player.prototype.__addGameObject = function(response) {
+    this.gameObjects.push(response.gameObject);
 }

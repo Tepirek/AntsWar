@@ -146,6 +146,7 @@ body {
     margin: 20px;
     color: #ffffff;
     width: 40vw;
+    z-index: 2000;
 }
 
 .chat input, .lobby input {

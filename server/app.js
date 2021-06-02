@@ -43,7 +43,8 @@ io.on('connection', (sock) => {
     sock.on('game_addNewSoldier', request => game.__addNewSoldier(request));
     sock.on('game_addNewDefender', request => game.__addNewDefender(request));
     sock.on('game_addForceLimit', request => game.__addForceLimit(request));
-    sock.on('game_moveSquad', request => game.__moveSquad(request))
+    sock.on('game_moveSquad', request => game.__moveSquad(request));
+    sock.on('game_battle', request => game.__battle(request));
 });
 
 /**

@@ -24,7 +24,9 @@ class Game {
         this.socket.on('game__addNewSoldier', response => this.__addNewSoldier(response));
         this.socket.on('game__addNewDefender', response => this.__addNewDefender(response));
         this.socket.on('game__moveSquad', response => this.__moveSquad(response));
+        this.socket.on('game__battle', response => this.__battle(response));
         this.socket.on('game__error', response => this.__error(response));
+        this.socket.on('game__getGameObjects', response => this.__getGameObjects(response));
         
         document.addEventListener('keydown', e => {
             if(e.keyCode === 9) {
@@ -141,6 +143,9 @@ Game.prototype.__addNewBuilding = function(response) {
     if(response.owner == this.player.id) {
         this.visibility[p.x][p.y].addFog(-1);
         this.gameObjects[p.x][p.y].forEach(o => this.setFog(o, -1));
+        if(this.lifeBarVisible) this.gameObjects[p.x][p.y].forEach(o => {
+            if(o.id != -1) o.showLifeBar();
+        });
     }
 };
 
@@ -321,4 +326,37 @@ Game.prototype.getGameObject = function(id) {
         )
     )
     return gameObject;
+}
+
+Game.prototype.battle = function(attacker, defender) {
+    this.socket.emit("game_battle", {
+        attacker: attacker,
+        defender: defender
+    });
+}
+
+Game.prototype.__battle = function(response) {
+    console.log(response);
+    var a = response.attacker;
+    var d = response.defender;
+    const aObject = this.getGameObject(a.id);
+    const dObject = this.getGameObject(d.id);
+    aObject.setCurrentLife(a.currentLife);
+    dObject.setCurrentLife(d.currentLife);
+    if(this.lifeBarVisible) {
+        aObject.updateLifeBar();    
+        dObject.updateLifeBar();
+    }
+    aObject.updateOptions();
+    dObject.updateOptions();
+}
+
+Game.prototype.__getGameObjects = function(response) {
+    for(var x = 0; x < this.gameObjects.length; x++) {
+        for(var y = 0; y < this.gameObjects[x].length; y++) {
+            this.gameObjects[x][y].forEach(e => {
+                e.gameObject.innerHTML = `${response.gameObjects[x][y].length}`;
+            })
+        }
+    }
 }

@@ -19,7 +19,7 @@ Building.prototype.showLifeBar = function(display) {
 
 Building.prototype.updateLifeBar = function() {
     this.lifeBar.innerHTML = ``;
-    const amount = Math.floor(this.currentLife * 11 / this.life);
+    const amount = Math.ceil(this.currentLife * 11 / this.life);
     for (var i = 0; i < amount; i++) {
         const lifeBlock = document.createElement('div');
         lifeBlock.style = `
@@ -33,4 +33,8 @@ Building.prototype.updateLifeBar = function() {
         `;
         this.lifeBar.appendChild(lifeBlock);
     }
+}
+
+Building.prototype.setCurrentLife = function(currentLife) {
+    this.currentLife = currentLife;
 }

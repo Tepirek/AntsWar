@@ -93,43 +93,55 @@ const config = {
     stats: {
         tower: {
             capacity: 10,
+            currentLife: 500,
             life: 500,
-            visibilityRange: 3
+            visibilityRange: 3,
+            attack: 15,
+            defense: 10
         },
         mine: {
             capacity: 10,
+            currentLife: 200,
             life: 200,
             visibilityRange: 2
         },
         sawmill: {
             capacity: 10,
+            currentLife: 200,
             life: 200,
             visibilityRange: 2
         },
         quarry: {
             capacity: 10,
+            currentLife: 200,
             life: 200,
             visibilityRange: 2
         },
         farm: {
             capacity: 10,
+            currentLife: 200,
             life: 200,
             visibilityRange: 2
         },
         base: {
             capacity: 10,
-            life: 1000,
+            currentLife: 2000,
+            life: 2000,
             forceLimit: 100,
-            visibilityRange: 2
+            visibilityRange: 200
         },
         squad: {
             capacity: 10,
+            currentLife: 10,
             life: 10,
-            visibilityRange: 1
+            visibilityRange: 1,
+            attack: 15,
+            defense: 10
         },
         wall: {
             capacity: 10,
-            life: 10,
+            currentLife: 1000,
+            life: 1000,
             visibilityRange: 1
         }
     },

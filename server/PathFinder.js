@@ -32,10 +32,11 @@ PathFinder.prototype.init = function(gameObjects) {
     }
 }
 
-PathFinder.prototype.find = function(start, end) {
+PathFinder.prototype.find = function(start, end, obstacle) {
     this.start = this.grid[start.x][start.y];
     this.end = this.grid[end.x][end.y];
-
+    this.end.wall = false;
+    if(obstacle != undefined) this.grid[obstacle.x][obstacle.y].obstacle = true;
     this.openSet.push(this.start);
 
     while (true) {
