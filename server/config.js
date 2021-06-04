@@ -128,7 +128,7 @@ const config = {
             currentLife: 2000,
             life: 2000,
             forceLimit: 100,
-            visibilityRange: 200
+            visibilityRange: 3
         },
         squad: {
             capacity: 10,
@@ -136,7 +136,8 @@ const config = {
             life: 50,
             visibilityRange: 1,
             attack: 10,
-            defense: 10
+            defense: 10,
+            movementSpeed: 50
         },
         wall: {
             capacity: 10,
@@ -145,8 +146,9 @@ const config = {
             visibilityRange: 1
         }
     },
+
     lobby: {
-        capacity: 1,
+        capacity: 2,
         delay: 500
     },
     player: {

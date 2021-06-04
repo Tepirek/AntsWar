@@ -55,8 +55,7 @@ Base.prototype.showOptions = function() {
 Base.prototype.click = function() {
     var action = JSON.parse(localStorage.getItem('action'));
     if(action.type == "move") {
-        // if(this.game.player.gameObjects.filter(o => o.id == this.id).length > 0) {   
-            if(false) {
+        if(this.game.player.gameObjects.filter(o => o.id == this.id).length > 0) {
             localStorage.setItem('action', JSON.stringify({ type: '', target: '' })); 
             this.showOptions();
         }

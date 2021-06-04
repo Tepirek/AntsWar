@@ -224,7 +224,6 @@ Game.prototype.__addNewSoldier = function(request) {
     }
 }
 
-
 /**
  * Adds a new defender to a given wall.
  * @param {request} request Request from the client.
@@ -410,13 +409,17 @@ Game.prototype.__moveSquad = function(request) {
                     current: current
                 });
             }
-            // this.io.emit('game__getGameObjects', {gameObjects: this.gameObjects});
             start = current;
             i++;
-        }, 500);
+        }, stats.squad.movementSpeed);
     }
 }
 
+/**
+ * 
+ * @param {*} id 
+ * @returns 
+ */
 Game.prototype.getGameObject = function(id) {
     let gameObject;
     this.gameObjects.every(
@@ -435,6 +438,9 @@ Game.prototype.getGameObject = function(id) {
     return gameObject;
 }
 
+/**
+ * 
+ */
 Game.prototype.__battle = function(request) {       
     const a = this.getGameObject(request.attacker.id);
     const d = this.getGameObject(request.defender.id);
@@ -445,7 +451,9 @@ Game.prototype.__battle = function(request) {
         }
         if(a.stats.currentLife <= 0 || d.stats.currentLife <= 0) {
             this.io.emit("game__destroyGameObject", {
-                id: d.id
+                id: d.id,
+                x: d.position.x,
+                y: d.position.y
             });
             if(a.stats.currentLife <= 0) removeGameObject(a);
             if(d.stats.currentLife <= 0) this.removeGameObject(d);
@@ -467,6 +475,12 @@ Game.prototype.__battle = function(request) {
     }, 1000);
 }
 
+/**
+ * 
+ * @param {*} o1 
+ * @param {*} o2 
+ * @returns 
+ */
 Game.prototype.checkIfNeighbors = function(o1, o2) {
     for(var i = o1.position.x - 1; i < o1.position.x + 2; i++) {
         for(var j = o1.position.y - 1; j < o1.position.y + 2; j++) {
@@ -477,10 +491,19 @@ Game.prototype.checkIfNeighbors = function(o1, o2) {
     return false;
 }
 
+/**
+ * 
+ * @param {*} object 
+ * @param {*} position 
+ */
 Game.prototype.updatePosition = function(object, position) {
     object.position = position;
 }
 
+/**
+ * 
+ * @param {*} object 
+ */
 Game.prototype.removeGameObject = function(object) {
     const x = object.position.x;
     const y = object.position.y;
@@ -488,6 +511,9 @@ Game.prototype.removeGameObject = function(object) {
     this.gameObjects[x][y] = this.gameObjects[x][y].filter(o => o.id != object.id);
 }
 
+/**
+ * 
+ */
 module.exports = {
     Game: Game
 }

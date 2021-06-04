@@ -57,31 +57,74 @@ Squad.prototype.showOptions = function() {
 }
 
 Squad.prototype.click = function(e) {
-    var ctrlHold = JSON.parse(localStorage.getItem("keyboard"))['ctrl'];
-    if(ctrlHold != undefined && ctrlHold) {
-        var action = JSON.parse(localStorage.getItem('action'));
-        if(action.object == null || !Array.isArray(action.object)) {
-            action['object'] = new Array();
-            action['object'].push(this);
-        } else {
-            if(action['object'].filter(o => o.id == this.id).length == 0) {
-                action['object'].push(this);
+    var action = JSON.parse(localStorage.getItem('action'));
+    if(action.type == "move") {
+        if(this.game.player.gameObjects.filter(o => o.id == this.id).length > 0) {
+            var ctrlHold = JSON.parse(localStorage.getItem("keyboard"))['ctrl'];
+            if(ctrlHold != undefined && ctrlHold) {
+                var action = JSON.parse(localStorage.getItem('action'));
+                if(action.object == null || !Array.isArray(action.object)) {
+                    action['object'] = new Array();
+                    action['object'].push(this);
+                } else {
+                    if(action['object'].filter(o => o.id == this.id).length == 0) {
+                        action['object'].push(this);
+                    }
+                }
+                this.select();
+                action.type = 'move';
+                action.target = 'squad';
+                localStorage.setItem('action', JSON.stringify(action));
+            } else {
+                var action = JSON.parse(localStorage.getItem('action'));
+                if(Array.isArray(action.object)) {
+                    action.object.forEach(o => {
+                        Object.assign(o, Squad.prototype);
+                        o.unselect();
+                    });
+                }
+                this.showOptions();
+                localStorage.setItem('action', JSON.stringify({ type: 'move', target: 'squad', object: this }));
             }
+        } else {
+            if(Array.isArray(action.object)) {
+                action.object.forEach(o => {
+                    Object.assign(o, Squad.prototype);
+                    o.unselect();
+                });
+                this.game.moveHerd(action.object, this.position);
+            }
+            else this.game.moveSquad(action.object, this.position);
+            action = { type: '', target: '', object: null };
+            localStorage.setItem('action', JSON.stringify(action));
         }
-        this.select();
-        action.type = 'move';
-        action.target = 'squad';
-        localStorage.setItem('action', JSON.stringify(action));
     } else {
-        var action = JSON.parse(localStorage.getItem('action'));
-        if(Array.isArray(action.object)) {
-            action.object.forEach(o => {
-                Object.assign(o, Squad.prototype);
-                o.unselect();
-            });
+        var ctrlHold = JSON.parse(localStorage.getItem("keyboard"))['ctrl'];
+        if(ctrlHold != undefined && ctrlHold) {
+            var action = JSON.parse(localStorage.getItem('action'));
+            if(action.object == null || !Array.isArray(action.object)) {
+                action['object'] = new Array();
+                action['object'].push(this);
+            } else {
+                if(action['object'].filter(o => o.id == this.id).length == 0) {
+                    action['object'].push(this);
+                }
+            }
+            this.select();
+            action.type = 'move';
+            action.target = 'squad';
+            localStorage.setItem('action', JSON.stringify(action));
+        } else {
+            var action = JSON.parse(localStorage.getItem('action'));
+            if(Array.isArray(action.object)) {
+                action.object.forEach(o => {
+                    Object.assign(o, Squad.prototype);
+                    o.unselect();
+                });
+            }
+            this.showOptions();
+            localStorage.setItem('action', JSON.stringify({ type: 'move', target: 'squad', object: this }));
         }
-        this.showOptions();
-        localStorage.setItem('action', JSON.stringify({ type: 'move', target: 'squad', object: this }));
     }
 }
 

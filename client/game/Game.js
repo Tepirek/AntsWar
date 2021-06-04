@@ -151,7 +151,7 @@ Game.prototype.__addNewBuilding = function(response) {
             if(o.id != -1) o.showLifeBar();
         });
     }
-};
+}
 
 /**
  * Sends a request to add a new employee to the server.
@@ -176,7 +176,7 @@ Game.prototype.__addNewWorker = function(response) {
     gameObject.gameObject.click();
     this.player.addNewWorker(gameObject.type);
     this.player.printResources();
-};
+}
 
 /**
  * Sends a request to add a new soldier to the server.
@@ -203,7 +203,7 @@ Game.prototype.__addNewSoldier = function(response) {
     gameObject.showOptions();
     gameObject.updateOptions();
     this.player.printResources();
-};
+}
 
 /**
  * Sends a request to add a new soldier to the server.
@@ -258,8 +258,11 @@ Game.prototype.getBuilding = function(data) {
     };
     const building = new constructors[`${data.type}`](data, this);
     return building;
-};
+}
 
+/**
+ * 
+ */
 Game.prototype.moveSquad = function(object, position) {
     this.socket.emit('game_moveSquad', {
         object: object,
@@ -268,6 +271,11 @@ Game.prototype.moveSquad = function(object, position) {
     });
 }
 
+/**
+ * 
+ * @param {*} herd 
+ * @param {*} position 
+ */
 Game.prototype.moveHerd = function(herd, position) {
     herd.forEach(squad => this.socket.emit('game_moveSquad', {
         object: squad,
@@ -276,6 +284,10 @@ Game.prototype.moveHerd = function(herd, position) {
     }));
 }
 
+/**
+ * 
+ * @param {*} response 
+ */
 Game.prototype.__moveSquad = function(response) {
     const previous = response.previous;
     const current = response.current;
@@ -329,6 +341,11 @@ Game.prototype.setFog = function(o, v) {
     }
 }
 
+/**
+ * 
+ * @param {*} id 
+ * @returns 
+ */
 Game.prototype.getGameObject = function(id) {
     let gameObject;
     this.gameObjects.every(
@@ -347,6 +364,11 @@ Game.prototype.getGameObject = function(id) {
     return gameObject;
 }
 
+/**
+ * 
+ * @param {*} attacker 
+ * @param {*} defender 
+ */
 Game.prototype.battle = function(attacker, defender) {
     this.socket.emit("game_battle", {
         attacker: attacker,
@@ -354,6 +376,9 @@ Game.prototype.battle = function(attacker, defender) {
     });
 }
 
+/**
+ * 
+ */
 Game.prototype.__battle = function(response) {
     var a = response.attacker;
     var d = response.defender;
@@ -369,6 +394,10 @@ Game.prototype.__battle = function(response) {
     dObject.updateOptions();
 }
 
+/**
+ * 
+ * @param {*} response 
+ */
 Game.prototype.__getGameObjects = function(response) {
     for(var x = 0; x < this.gameObjects.length; x++) {
         for(var y = 0; y < this.gameObjects[x].length; y++) {
@@ -379,7 +408,16 @@ Game.prototype.__getGameObjects = function(response) {
     }
 }
 
+/**
+ * 
+ * @param {*} response 
+ */
 Game.prototype.__destroyGameObject = function(response) {
     const gameObject = this.getGameObject(response.id).gameObject;
     if(gameObject.parentNode) gameObject.parentNode.removeChild(gameObject);
+    if(this.player.gameObjects.filter(o => o.id == response.id).length > 0) {
+        this.visibility[response.x][response.y].addFog(1);
+        this.gameObjects[response.x][response.y].forEach(o => this.setFog(o, 1));
+    }
+    this.gameObjects[response.x][response.y] = this.gameObjects[response.x][response.y].filter(o => o.id != response.id);
 }

@@ -6,6 +6,10 @@ class Business extends Building {
         this.gameObject.onclick = (e) => this.click();
     };
 };
+
+/**
+ * 
+ */
 Business.prototype.initOptions = function() {
     let options = document.querySelector('.objectOptions');
     options.innerHTML = `
@@ -66,6 +70,9 @@ Business.prototype.initOptions = function() {
     document.body.appendChild(buildingsTip);
 }
 
+/**
+ * 
+ */
 Business.prototype.updateOptions = function() {
     const lifeBar = document.querySelector(`#lifeBar_${this.id}`);
     if(lifeBar != undefined) {
@@ -84,22 +91,27 @@ Business.prototype.showOptions = function() {
     this.initOptions();
 }
 
+/**
+ * 
+ */
 Business.prototype.click = function() {
     var action = JSON.parse(localStorage.getItem('action'));
     if(action.type == "move") {
-        // if(this.game.player.gameObjects.filter(o => o.id == this.id).length > 0) {   
-            if(false) {
-            localStorage.setItem('action', JSON.stringify({ type: '', target: '' })); 
-            this.showOptions();
-        }
         if(Array.isArray(action.object)) {
             action.object.forEach(o => {
                 Object.assign(o, Squad.prototype);
                 o.unselect();
             });
-            this.game.moveHerd(action.object, this.position);
         }
-        else this.game.moveSquad(action.object, this.position);
+        if(this.game.player.gameObjects.filter(o => o.id == this.id).length > 0) {
+            localStorage.setItem('action', JSON.stringify({ type: '', target: '' })); 
+            this.showOptions();
+        } else {
+            if(Array.isArray(action.object)) {
+                this.game.moveHerd(action.object, this.position);
+            }
+            else this.game.moveSquad(action.object, this.position);
+        }
         action = { type: '', target: '', object: null };
         localStorage.setItem('action', JSON.stringify(action));
     } else {
